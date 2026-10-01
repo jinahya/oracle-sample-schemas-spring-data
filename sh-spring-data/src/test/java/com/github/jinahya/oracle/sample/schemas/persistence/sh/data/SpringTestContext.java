@@ -22,8 +22,10 @@ public class SpringTestContext {
     /**
      * Drops the {@code @IdClass} flavour of every twice-mapped table from the scan.
      * <p>
-     * SH maps COSTS, SALES, PROFITS and FWEEK_PSCAT_SALES_MV twice each, as Cost/Sale/Profits/ FweekPscatSalesMv
-     * WithEmbeddedId and WithIdClass. The pairs share an entity name each, so a scan that takes both fails as a
+     * SH maps {@code COSTS}, {@code SALES}, {@code PROFITS} and {@code FWEEK_PSCAT_SALES_MV} twice each, as
+     * {@code CostWithEmbeddedId} / {@code CostWithIdClass}, {@code SaleWithEmbeddedId} / {@code SaleWithIdClass},
+     * {@code ProfitsWithEmbeddedId} / {@code ProfitsWithIdClass}, and {@code FweekPscatSalesMvWithEmbeddedId} /
+     * {@code FweekPscatSalesMvWithIdClass}. Each pair shares an entity name, so a scan that takes both fails as a
      * duplicate. Upstream separates them with {@code <exclude-unlisted-classes>}; this is the Boot equivalent, and it
      * is the hook {@code JpaBaseConfiguration} hands its scanner.
      *

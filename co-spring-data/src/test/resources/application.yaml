@@ -47,6 +47,15 @@ spring:
         # co/src/test/resources/META-INF/orm-it.xml; the Boot route to that file, should this
         # ever need to run on a provider other than Hibernate, is spring.jpa.mapping-resources.
         default_schema: CO
+        # Named rather than detected. Hibernate would otherwise pick the dialect from the JDBC
+        # metadata of a first connection, and when that connection fails (no container on 1521) it
+        # logs the real cause as HHH000342 and throws "Unable to determine Dialect" instead. With
+        # the dialect named, a missing database fails at the first query with the Oracle error
+        # itself. OracleDialect still reads the server version from that metadata when it can, so
+        # nothing version-specific is lost; Hibernate logs HHH90000025 to say this is redundant.
+        # NOTE: this file follows a @DataJpaTest onto H2 too, where this dialect is wrong; such a
+        # test has to override it along with default_schema.
+        dialect: org.hibernate.dialect.OracleDialect
         format_sql: true
         highlight_sql: true
     # No web layer in these tests: a lazy association touched outside a transaction should fail

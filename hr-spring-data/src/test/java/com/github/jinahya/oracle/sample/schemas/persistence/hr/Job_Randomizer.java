@@ -30,11 +30,12 @@ class Job_Randomizer
 
     /**
      * {@inheritDoc}
+     * <p>
+     * The two salaries are assigned here rather than left to Instancio, which draws them independently. {@link Job}
+     * asserts that both are positive and that the minimum does not exceed the maximum, so an independent pair fails
+     * validation roughly half of the time.
      *
      * @return {@inheritDoc}
-     * @implNote The two salaries are assigned here rather than left to PODAM, which draws them independently:
-     *         {@link Job} asserts that both are positive and that the minimum does not exceed the maximum, so an
-     *         independent pair fails validation roughly half of the time.
      */
     @Override
     public Job get() {

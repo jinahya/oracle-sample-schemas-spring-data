@@ -22,8 +22,8 @@ public class SpringTestContext {
     /**
      * Drops the {@code @IdClass} flavour of every twice-mapped table from the scan.
      * <p>
-     * HR maps JOB_HISTORY twice, as JobHistoryWithEmbeddedId and JobHistoryWithIdClass. The pairs share an entity name
-     * each, so a scan that takes both fails as a duplicate. Upstream separates them with
+     * HR maps {@code JOB_HISTORY} twice, as {@code JobHistoryWithEmbeddedId} and {@code JobHistoryWithIdClass}. The two
+     * share an entity name, so a scan that takes both fails as a duplicate. Upstream separates them with
      * {@code <exclude-unlisted-classes>}; this is the Boot equivalent, and it is the hook {@code JpaBaseConfiguration}
      * hands its scanner.
      *

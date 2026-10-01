@@ -13,9 +13,13 @@ import static org.assertj.core.api.Assertions.assertThat;
 /**
  * Tests {@link SpringTestContext}, which is all this module has to test until it declares repositories.
  * <p>
- * Booting at all is the assertion that matters: it proves {@code application.yaml} reaches the installed HR schema as
- * {@code dmlonly}, that {@code hibernate.default_schema} qualifies the entities' unqualified table names, and that the
- * {@code @EntityScan} finds them one package up in the upstream jar.
+ * Booting proves that the {@code @EntityScan} finds the entities one package up in the upstream jar, and that the
+ * {@code ManagedClassNameFilter} keeps the persistence unit free of duplicate entity names.
+ * <p>
+ * It does <em>not</em> prove that the database is reachable. {@code application.yaml} names the dialect, so Hibernate
+ * only logs a failed metadata connection ({@code HHH000342}) and starts anyway. Nothing here runs a query, so this
+ * test passes with no HR schema at all, and it does not exercise {@code hibernate.default_schema} either. The first
+ * repository test that queries the schema will cover both.
  *
  * @see SpringTestContext
  */
