@@ -90,10 +90,15 @@
     <version.org.projectlombok>1.18.48</version.org.projectlombok>
 
     <!-- https://central.sonatype.com/artifact/io.github.jinahya/jinahya-persistence-test-utils/versions -->
-    <version.jinahya-persistence>0.6.0</version.jinahya-persistence>
+    <version.jinahya-persistence>0.6.1</version.jinahya-persistence>
 
-    <!-- https://central.sonatype.com/artifact/org.instancio/instancio-core/versions -->
-    <version.org.instancio>6.0.1</version.org.instancio>
+    <!--
+      What the randomizers in the upstream test-companion jars fill instances with. Same property
+      name and value as upstream, which compiles them against it.
+      -->
+    <!-- https://central.sonatype.com/artifact/uk.co.jemos.podam/podam/versions -->
+    <version.uk.co.jemos.podam>8.0.2.RELEASE</version.uk.co.jemos.podam>
+
   </properties>
 
   <dependencyManagement>
@@ -112,22 +117,58 @@
       </dependency>
       <!--
         The entity modules, managed here so that a schema module names groupId/artifactId only, and the
-        upstream version moves in one place.
+        upstream version moves in one place. Upstream publishes them as
+        io.github.jinahya:oracle-sample-schemas-persistence-<schema>.
         -->
       <dependency>
-        <groupId>com.github.jinahya</groupId>
-        <artifactId>co</artifactId>
+        <groupId>io.github.jinahya</groupId>
+        <artifactId>oracle-sample-schemas-persistence-co</artifactId>
         <version>${version.oracle-sample-schemas-persistence}</version>
       </dependency>
       <dependency>
-        <groupId>com.github.jinahya</groupId>
-        <artifactId>hr</artifactId>
+        <groupId>io.github.jinahya</groupId>
+        <artifactId>oracle-sample-schemas-persistence-hr</artifactId>
         <version>${version.oracle-sample-schemas-persistence}</version>
       </dependency>
       <dependency>
-        <groupId>com.github.jinahya</groupId>
-        <artifactId>sh</artifactId>
+        <groupId>io.github.jinahya</groupId>
+        <artifactId>oracle-sample-schemas-persistence-sh</artifactId>
         <version>${version.oracle-sample-schemas-persistence}</version>
+      </dependency>
+      <!--
+        The upstream randomizers and persisters. They are not a module of their own but a second jar of
+        each entity module, classified test-companion, and dependencyManagement keys an entry by its
+        classifier too, so each needs an entry beside the plain one above. The classified jar shares
+        the entity module's pom, in which podam and jinahya-persistence-test-utils are test-scoped and
+        so not transitive; the <dependencies> of this pom supply both to every module.
+        -->
+      <dependency>
+        <groupId>io.github.jinahya</groupId>
+        <artifactId>oracle-sample-schemas-persistence-co</artifactId>
+        <version>${version.oracle-sample-schemas-persistence}</version>
+        <classifier>test-companion</classifier>
+      </dependency>
+      <dependency>
+        <groupId>io.github.jinahya</groupId>
+        <artifactId>oracle-sample-schemas-persistence-hr</artifactId>
+        <version>${version.oracle-sample-schemas-persistence}</version>
+        <classifier>test-companion</classifier>
+      </dependency>
+      <dependency>
+        <groupId>io.github.jinahya</groupId>
+        <artifactId>oracle-sample-schemas-persistence-sh</artifactId>
+        <version>${version.oracle-sample-schemas-persistence}</version>
+        <classifier>test-companion</classifier>
+      </dependency>
+      <dependency>
+        <groupId>uk.co.jemos.podam</groupId>
+        <artifactId>podam</artifactId>
+        <version>${version.uk.co.jemos.podam}</version>
+      </dependency>
+      <dependency>
+        <groupId>io.github.jinahya</groupId>
+        <artifactId>jinahya-persistence-test-utils</artifactId>
+        <version>${version.jinahya-persistence}</version>
       </dependency>
       <!--
         Lombok, pinned instead of left to the Boot BOM. This is the one place in this pom that
@@ -226,21 +267,16 @@
     <dependency>
       <groupId>io.github.jinahya</groupId>
       <artifactId>jinahya-persistence-test-utils</artifactId>
-      <version>${version.jinahya-persistence}</version>
       <scope>test</scope>
     </dependency>
     <!--
-      Instancio, what the *_Randomizer classes fill instances with. __Randomizer offers four
-      backends as nested classes (___OfPodam, ___OfInstancio, ___OfEasyRandom, ___OfFixtureMonkey)
-      and declares none of them itself, so the one actually extended has to be named here.
-      ___OfInstancio exposes Settings and InstancioObjectApi as its override points, both from
-      instancio-core, so the core artifact is enough; instancio-junit would only add the
-      @InstancioExtension / @Seed lifecycle, which these randomizers do not use.
+      podam, what the randomizers of the upstream test-companion jars fill instances with: they extend
+      PodamObjectRandomizer, from the jinahya-object-randomizer that jinahya-persistence-test-utils
+      brings. The companion jars carry no dependencies of their own, so every module needs it here.
       -->
     <dependency>
-      <groupId>org.instancio</groupId>
-      <artifactId>instancio-core</artifactId>
-      <version>${version.org.instancio}</version>
+      <groupId>uk.co.jemos.podam</groupId>
+      <artifactId>podam</artifactId>
       <scope>test</scope>
     </dependency>
   </dependencies>

@@ -16,8 +16,19 @@
 
   <dependencies>
     <dependency>
-      <groupId>com.github.jinahya</groupId>
-      <artifactId>hr</artifactId>
+      <groupId>io.github.jinahya</groupId>
+      <artifactId>oracle-sample-schemas-persistence-hr</artifactId>
+    </dependency>
+    <!--
+      The upstream randomizers, in place of ones of this module's own. podam and
+      jinahya-persistence-test-utils, which they need and the classified jar does not bring, come from
+      the root pom.
+      -->
+    <dependency>
+      <groupId>io.github.jinahya</groupId>
+      <artifactId>oracle-sample-schemas-persistence-hr</artifactId>
+      <classifier>test-companion</classifier>
+      <scope>test</scope>
     </dependency>
     <!--
       The tests in src/test/resources/application.yaml connect to a real Oracle instance, so the

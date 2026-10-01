@@ -16,8 +16,19 @@
 
   <dependencies>
     <dependency>
-      <groupId>com.github.jinahya</groupId>
-      <artifactId>co</artifactId>
+      <groupId>io.github.jinahya</groupId>
+      <artifactId>oracle-sample-schemas-persistence-co</artifactId>
+    </dependency>
+    <!--
+      The upstream randomizers, in place of ones of this module's own. podam and
+      jinahya-persistence-test-utils, which they need and the classified jar does not bring, come from
+      the root pom.
+      -->
+    <dependency>
+      <groupId>io.github.jinahya</groupId>
+      <artifactId>oracle-sample-schemas-persistence-co</artifactId>
+      <classifier>test-companion</classifier>
+      <scope>test</scope>
     </dependency>
     <!--
       The tests in src/test/resources/application.yaml connect to a real Oracle instance, so the
@@ -29,11 +40,6 @@
     <dependency><!-- https://central.sonatype.com/artifact/com.oracle.database.jdbc/ojdbc17 -->
       <groupId>com.oracle.database.jdbc</groupId>
       <artifactId>ojdbc17</artifactId>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>com.github.jinahya</groupId>
-      <artifactId>sh</artifactId>
       <scope>test</scope>
     </dependency>
   </dependencies>

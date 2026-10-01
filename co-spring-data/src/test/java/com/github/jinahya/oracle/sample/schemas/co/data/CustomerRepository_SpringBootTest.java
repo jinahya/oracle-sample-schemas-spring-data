@@ -1,7 +1,7 @@
 package com.github.jinahya.oracle.sample.schemas.co.data;
 
+import com.github.jinahya.object.randomizer.ObjectRandomizerUtils;
 import com.github.jinahya.oracle.sample.schemas.co.Customer;
-import com.github.jinahya.persistence.test.util.__RandomizerUtils;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import org.junit.jupiter.api.Nested;
@@ -40,7 +40,7 @@ class CustomerRepository_SpringBootTest {
          */
         @Test
         void __() {
-            final var randomized = __RandomizerUtils.newRandomizedInstanceOf(Customer.class).orElseThrow();
+            final var randomized = ObjectRandomizerUtils.newRandomizedInstanceOf(Customer.class).orElseThrow();
             final var saved = customerRepository.save(randomized);
             final var found = customerRepository.findByEmailAddress(saved.getEmailAddress());
             assertThat(found).isNotEmpty().hasValue(saved);
