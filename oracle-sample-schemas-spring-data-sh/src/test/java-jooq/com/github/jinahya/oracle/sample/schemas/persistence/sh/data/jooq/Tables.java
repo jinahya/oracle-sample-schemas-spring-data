@@ -3,7 +3,6 @@
  */
 package com.github.jinahya.oracle.sample.schemas.persistence.sh.data.jooq;
 
-
 import com.github.jinahya.oracle.sample.schemas.persistence.sh.data.jooq.tables.CalMonthSalesMv;
 import com.github.jinahya.oracle.sample.schemas.persistence.sh.data.jooq.tables.Channels;
 import com.github.jinahya.oracle.sample.schemas.persistence.sh.data.jooq.tables.Costs;
@@ -17,11 +16,10 @@ import com.github.jinahya.oracle.sample.schemas.persistence.sh.data.jooq.tables.
 import com.github.jinahya.oracle.sample.schemas.persistence.sh.data.jooq.tables.SupplementaryDemographics;
 import com.github.jinahya.oracle.sample.schemas.persistence.sh.data.jooq.tables.Times;
 
-
 /**
  * Convenience access to all tables in SH.
  */
-@SuppressWarnings({ "all", "unchecked", "rawtypes", "this-escape" })
+@SuppressWarnings({"all", "unchecked", "rawtypes", "this-escape"})
 public class Tables {
 
     /**
@@ -77,7 +75,8 @@ public class Tables {
     /**
      * The table <code>SH.SUPPLEMENTARY_DEMOGRAPHICS</code>.
      */
-    public static final SupplementaryDemographics SUPPLEMENTARY_DEMOGRAPHICS = SupplementaryDemographics.SUPPLEMENTARY_DEMOGRAPHICS;
+    public static final SupplementaryDemographics SUPPLEMENTARY_DEMOGRAPHICS =
+            SupplementaryDemographics.SUPPLEMENTARY_DEMOGRAPHICS;
 
     /**
      * The table <code>SH.TIMES</code>.

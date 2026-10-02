@@ -17,8 +17,8 @@ import static org.assertj.core.api.Assertions.assertThat;
  * {@code ManagedClassNameFilter} keeps the persistence unit free of duplicate entity names.
  * <p>
  * It does <em>not</em> prove that the database is reachable. {@code application.yaml} names the dialect, so Hibernate
- * only logs a failed metadata connection ({@code HHH000342}) and starts anyway. Nothing here runs a query, so this
- * test passes with no HR schema at all, and it does not exercise {@code hibernate.default_schema} either. The first
+ * only logs a failed metadata connection ({@code HHH000342}) and starts anyway. Nothing here runs a query, so this test
+ * passes with no HR schema at all, and it does not exercise {@code hibernate.default_schema} either. The first
  * repository test that queries the schema will cover both.
  *
  * @see ___Spring_TestContext

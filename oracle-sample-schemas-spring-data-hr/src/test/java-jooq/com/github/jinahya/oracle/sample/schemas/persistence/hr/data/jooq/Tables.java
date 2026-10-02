@@ -3,7 +3,6 @@
  */
 package com.github.jinahya.oracle.sample.schemas.persistence.hr.data.jooq;
 
-
 import com.github.jinahya.oracle.sample.schemas.persistence.hr.data.jooq.tables.Countries;
 import com.github.jinahya.oracle.sample.schemas.persistence.hr.data.jooq.tables.Departments;
 import com.github.jinahya.oracle.sample.schemas.persistence.hr.data.jooq.tables.EmpDetailsView;
@@ -13,11 +12,10 @@ import com.github.jinahya.oracle.sample.schemas.persistence.hr.data.jooq.tables.
 import com.github.jinahya.oracle.sample.schemas.persistence.hr.data.jooq.tables.Locations;
 import com.github.jinahya.oracle.sample.schemas.persistence.hr.data.jooq.tables.Regions;
 
-
 /**
  * Convenience access to all tables in HR.
  */
-@SuppressWarnings({ "all", "unchecked", "rawtypes", "this-escape" })
+@SuppressWarnings({"all", "unchecked", "rawtypes", "this-escape"})
 public class Tables {
 
     /**

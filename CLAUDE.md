@@ -20,8 +20,9 @@ Upstream's entities all live in `com.github.jinahya.oracle.sample.schemas.persis
 `hr`/`sh` here follow it with `.data`. `co` here has **not** been moved yet and is still
 `…schemas.co.data`; do not extrapolate one module's package to another.
 
-Only `oracle-sample-schemas-spring-data-co` has repositories so far (`CustomerRepository`,
-`ProductRepository`). `hr` and `sh` hold just the test context and a test that boots it.
+Every module has one repository per upstream `@Entity` (`<Entity>Repository`), except the `*WithIdClass`
+flavours, which the test context leaves out of the persistence unit. Only `co`'s `CustomerRepository` declares
+methods; the rest are empty, as are their tests.
 
 ## Upstream
 

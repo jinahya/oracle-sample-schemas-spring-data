@@ -3,7 +3,6 @@
  */
 package com.github.jinahya.oracle.sample.schemas.persistence.hr.data.jooq;
 
-
 import com.github.jinahya.oracle.sample.schemas.persistence.hr.data.jooq.tables.Countries;
 import com.github.jinahya.oracle.sample.schemas.persistence.hr.data.jooq.tables.Departments;
 import com.github.jinahya.oracle.sample.schemas.persistence.hr.data.jooq.tables.Employees;
@@ -24,22 +23,42 @@ import org.jooq.UniqueKey;
 import org.jooq.impl.DSL;
 import org.jooq.impl.Internal;
 
-
 /**
  * A class modelling foreign key relationships and constraints of tables in HR.
  */
-@SuppressWarnings({ "all", "unchecked", "rawtypes", "this-escape" })
+@SuppressWarnings({"all", "unchecked", "rawtypes", "this-escape"})
 public class Keys {
 
     // -------------------------------------------------------------------------
     // UNIQUE and PRIMARY KEY definitions
     // -------------------------------------------------------------------------
 
-    public static final UniqueKey<CountriesRecord> PK_COUNTRIES = Internal.createUniqueKey(Countries.COUNTRIES, DSL.name("PK_COUNTRIES"), new TableField[] { Countries.COUNTRIES.COUNTRY_ID }, true);
-    public static final UniqueKey<DepartmentsRecord> PK_DEPARTMENTS = Internal.createUniqueKey(Departments.DEPARTMENTS, DSL.name("PK_DEPARTMENTS"), new TableField[] { Departments.DEPARTMENTS.DEPARTMENT_ID }, true);
-    public static final UniqueKey<EmployeesRecord> PK_EMPLOYEES = Internal.createUniqueKey(Employees.EMPLOYEES, DSL.name("PK_EMPLOYEES"), new TableField[] { Employees.EMPLOYEES.EMPLOYEE_ID }, true);
-    public static final UniqueKey<JobHistoryRecord> PK_JOB_HISTORY = Internal.createUniqueKey(JobHistory.JOB_HISTORY, DSL.name("PK_JOB_HISTORY"), new TableField[] { JobHistory.JOB_HISTORY.EMPLOYEE_ID, JobHistory.JOB_HISTORY.START_DATE }, true);
-    public static final UniqueKey<JobsRecord> PK_JOBS = Internal.createUniqueKey(Jobs.JOBS, DSL.name("PK_JOBS"), new TableField[] { Jobs.JOBS.JOB_ID }, true);
-    public static final UniqueKey<LocationsRecord> PK_LOCATIONS = Internal.createUniqueKey(Locations.LOCATIONS, DSL.name("PK_LOCATIONS"), new TableField[] { Locations.LOCATIONS.LOCATION_ID }, true);
-    public static final UniqueKey<RegionsRecord> PK_REGIONS = Internal.createUniqueKey(Regions.REGIONS, DSL.name("PK_REGIONS"), new TableField[] { Regions.REGIONS.REGION_ID }, true);
+    public static final UniqueKey<CountriesRecord> PK_COUNTRIES =
+            Internal.createUniqueKey(Countries.COUNTRIES, DSL.name("PK_COUNTRIES"),
+                                     new TableField[]{Countries.COUNTRIES.COUNTRY_ID}, true);
+
+    public static final UniqueKey<DepartmentsRecord> PK_DEPARTMENTS =
+            Internal.createUniqueKey(Departments.DEPARTMENTS, DSL.name("PK_DEPARTMENTS"),
+                                     new TableField[]{Departments.DEPARTMENTS.DEPARTMENT_ID}, true);
+
+    public static final UniqueKey<EmployeesRecord> PK_EMPLOYEES =
+            Internal.createUniqueKey(Employees.EMPLOYEES, DSL.name("PK_EMPLOYEES"),
+                                     new TableField[]{Employees.EMPLOYEES.EMPLOYEE_ID}, true);
+
+    public static final UniqueKey<JobHistoryRecord> PK_JOB_HISTORY =
+            Internal.createUniqueKey(JobHistory.JOB_HISTORY, DSL.name("PK_JOB_HISTORY"),
+                                     new TableField[]{JobHistory.JOB_HISTORY.EMPLOYEE_ID,
+                                             JobHistory.JOB_HISTORY.START_DATE},
+                                     true);
+
+    public static final UniqueKey<JobsRecord> PK_JOBS =
+            Internal.createUniqueKey(Jobs.JOBS, DSL.name("PK_JOBS"), new TableField[]{Jobs.JOBS.JOB_ID}, true);
+
+    public static final UniqueKey<LocationsRecord> PK_LOCATIONS =
+            Internal.createUniqueKey(Locations.LOCATIONS, DSL.name("PK_LOCATIONS"),
+                                     new TableField[]{Locations.LOCATIONS.LOCATION_ID}, true);
+
+    public static final UniqueKey<RegionsRecord> PK_REGIONS =
+            Internal.createUniqueKey(Regions.REGIONS, DSL.name("PK_REGIONS"),
+                                     new TableField[]{Regions.REGIONS.REGION_ID}, true);
 }
