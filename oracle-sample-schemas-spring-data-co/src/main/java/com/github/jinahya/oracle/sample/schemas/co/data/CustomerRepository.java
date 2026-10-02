@@ -53,6 +53,7 @@ public interface CustomerRepository
     Optional<Customer> selectOneByEmailAddress(@Param("emailAddress") String emailAddress);
 
     // -----------------------------------------------------------------------------------------------------------------
+
     /**
      * Finds the customer with the specified value of {@link Customer_#EMAIL_ADDRESS} attribute.
      * <p>

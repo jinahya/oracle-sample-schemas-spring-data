@@ -14,6 +14,13 @@
 
   <description>Spring Data for the customer_orders schema</description>
 
+  <properties>
+    <!-- See the jooq-codegen profile of the root pom. -->
+    <jooq-codegen.skip>false</jooq-codegen.skip>
+    <jooq-codegen.inputSchema>CO</jooq-codegen.inputSchema>
+    <jooq-codegen.packageName>com.github.jinahya.oracle.sample.schemas.co.data.jooq</jooq-codegen.packageName>
+  </properties>
+
   <dependencies>
     <!-- main ======================================================================================= -->
     <dependency>

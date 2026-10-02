@@ -147,3 +147,21 @@ A `JsonMapper` (Jackson 3, `tools.jackson.databind.json.JsonMapper`) is injectab
 Logging is set in `application.yaml`: `org.hibernate.SQL: debug` and `org.hibernate.orm.jdbc.bind:
 trace` for statements and bind values, and the module's own `.data` package at `debug` so a test's
 `log.debug(...)` prints. No `logback-test.xml` is needed.
+
+## jOOQ (tests only)
+
+`spring-boot-starter-jooq-test` (test scope, Boot's version, the open source edition) gives a `DSLContext` on the
+test datasource. Use it for what JPA cannot map, chiefly the views, which have no primary key.
+
+- **Generated classes live in `src/test/java-jooq`** (a test source root added by `build-helper-maven-plugin`), in
+  `…data.jooq`, and are committed. Regenerate with `./_mvn_jooq-codegen.sh` (the `jooq-codegen` profile), which reads
+  the live Oracle schema through the generic `JDBCDatabase`. jOOQ empties `…data.jooq` on every run: write nothing
+  there by hand. Hand-written jOOQ code goes beside it, in `…data` under `src/test/java-jooq`.
+- **There is no Oracle dialect**: it is commercial only, so jOOQ runs with `SQLDialect.DEFAULT` against Oracle.
+  Plain `select`/`where`/`orderBy`/`fetch` work. `limit`/`offset` do not (`DEFAULT` renders `LIMIT ?`, which Oracle
+  rejects), and an empty `IN` list renders `IN ()`: guard it. An `ORA-` error from jOOQ points at the dialect first.
+- **Generated column types come from `<forcedTypes>`** in the profile: `JDBCDatabase` reports Oracle's type names
+  without precision, so every `NUMBER` is a `BigDecimal` except an `*_ID` column, which is a `Long`.
+- **Mapping into upstream classes** (`fetchInto(ProductReview.class)`) reads their `@Column` names, which needs
+  `jooq-jpa-extensions` and the provider that `_Jooq_TestConfiguration` sets; `@Import` it.
+- jOOQ has no repository abstraction and knows nothing of `Pageable`/`Page`.
