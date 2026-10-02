@@ -30,15 +30,13 @@
   </developers>
 
   <!--
-    One module per sample schema, named <schema>-spring-data after the artifact it wraps: co-spring-data
-    depends on com.github.jinahya:co, and so on. The schema modules of oracle-sample-schemas-persistence
-    take the bare schema name (co, hr, sh), so the suffix is what keeps the two projects' artifacts apart
-    on one classpath.
+    One module per sample schema: oracle-sample-schemas-spring-data-<schema> wraps
+    io.github.jinahya:oracle-sample-schemas-persistence-<schema>.
     -->
   <modules>
-    <module>co-spring-data</module>
-    <module>hr-spring-data</module>
-    <module>sh-spring-data</module>
+    <module>oracle-sample-schemas-spring-data-co</module>
+    <module>oracle-sample-schemas-spring-data-hr</module>
+    <module>oracle-sample-schemas-spring-data-sh</module>
   </modules>
 
   <scm>
@@ -56,22 +54,7 @@
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 
-    <!--
-      The entities of oracle-sample-schemas-persistence publish their main sources at release 21,
-      so 21 is the floor for anything consuming them.
-      -->
-    <maven.compiler.release>21</maven.compiler.release>
-
-    <!--
-      Spring Boot 4.x is the line that matches those entities: it manages jakarta.persistence-api
-      3.2.0, the same Jakarta Persistence generation the mappings are written against, and it is
-      built on the Jakarta EE 11 baseline. Boot 3.5 and earlier sit on Jakarta EE 10
-      (jakarta.persistence-api 3.1), which does not know @EmbeddedId/@IdClass entities compiled
-      against 3.2 API surface. Do not fall back to the 3.x line to avoid an upgrade.
-      -->
-    <!-- https://docs.spring.io/spring-boot/appendix/dependency-versions/coordinates.html -->
-    <version.org.springframework>7.0.9</version.org.springframework>
-    <version.org.springframework.boot>4.1.1</version.org.springframework.boot>
+    <!-- The upstream entities are compiled at release 21; that is the floor. -->
     <maven.compiler.source>25</maven.compiler.source>
     <maven.compiler.target>${maven.compiler.source}</maven.compiler.target>
     <maven.compiler.release>${maven.compiler.target}</maven.compiler.release>
@@ -80,33 +63,31 @@
     <maven.compiler.testRelease>${maven.compiler.testSource}</maven.compiler.testRelease>
 
     <!--
-      The entity modules this project wraps. They are SNAPSHOTs published nowhere but the local
-      repository, so a change over there has to be `mvn install`ed from that checkout before it is
-      visible here.
+      Boot 4, not 3: it manages jakarta.persistence-api 3.2, which the upstream mappings are written
+      against. Boot 3.x manages 3.1. Do not downgrade.
       -->
+    <!-- https://docs.spring.io/spring-boot/appendix/dependency-versions/coordinates.html -->
+    <version.org.springframework.boot>4.1.1</version.org.springframework.boot>
+
+    <!-- Local SNAPSHOTs only: `mvn install` the sibling checkout to pick up a change there. -->
     <version.oracle-sample-schemas-persistence>0.0.1-SNAPSHOT</version.oracle-sample-schemas-persistence>
 
-    <!-- https://central.sonatype.com/artifact/org.projectlombok/lombok/versions -->
-    <version.org.projectlombok>1.18.48</version.org.projectlombok>
-
     <!-- https://central.sonatype.com/artifact/io.github.jinahya/jinahya-persistence-test-utils/versions -->
-    <version.jinahya-persistence>0.6.1</version.jinahya-persistence>
+    <version.jinahya-persistence>0.6.2-SNAPSHOT</version.jinahya-persistence>
 
-    <!--
-      What the randomizers in the upstream test-companion jars fill instances with. Same property
-      name and value as upstream, which compiles them against it.
-      -->
+    <!-- Same property and value as upstream, which compiles its randomizers against it. -->
     <!-- https://central.sonatype.com/artifact/uk.co.jemos.podam/podam/versions -->
     <version.uk.co.jemos.podam>8.0.2.RELEASE</version.uk.co.jemos.podam>
 
+    <!-- https://central.sonatype.com/artifact/org.projectlombok/lombok/versions -->
+    <version.org.projectlombok>1.18.48</version.org.projectlombok>
   </properties>
 
   <dependencyManagement>
     <dependencies>
       <!--
-        The Spring Boot BOM, imported rather than inherited: this project keeps its own parent-less
-        pom, so spring-boot-starter-parent is not in play, and every Spring/Boot/Hibernate version
-        comes from here with no <version> spelled out at the dependency.
+        Imported, not inherited: this pom is parent-less. Every Spring, Boot and Hibernate version
+        comes from here, so dependencies on them carry no <version>.
         -->
       <dependency>
         <groupId>org.springframework.boot</groupId>
@@ -115,11 +96,8 @@
         <type>pom</type>
         <scope>import</scope>
       </dependency>
-      <!--
-        The entity modules, managed here so that a schema module names groupId/artifactId only, and the
-        upstream version moves in one place. Upstream publishes them as
-        io.github.jinahya:oracle-sample-schemas-persistence-<schema>.
-        -->
+
+      <!-- The upstream entity modules. -->
       <dependency>
         <groupId>io.github.jinahya</groupId>
         <artifactId>oracle-sample-schemas-persistence-co</artifactId>
@@ -135,12 +113,11 @@
         <artifactId>oracle-sample-schemas-persistence-sh</artifactId>
         <version>${version.oracle-sample-schemas-persistence}</version>
       </dependency>
+
       <!--
-        The upstream randomizers and persisters. They are not a module of their own but a second jar of
-        each entity module, classified test-companion, and dependencyManagement keys an entry by its
-        classifier too, so each needs an entry beside the plain one above. The classified jar shares
-        the entity module's pom, in which podam and jinahya-persistence-test-utils are test-scoped and
-        so not transitive; the <dependencies> of this pom supply both to every module.
+        Their randomizers and persisters, published as a second jar classified test-companion; a
+        classifier needs an entry of its own. The jar brings none of its dependencies, so podam and
+        jinahya-persistence-test-utils are declared below.
         -->
       <dependency>
         <groupId>io.github.jinahya</groupId>
@@ -160,28 +137,27 @@
         <version>${version.oracle-sample-schemas-persistence}</version>
         <classifier>test-companion</classifier>
       </dependency>
+
       <dependency>
-        <groupId>uk.co.jemos.podam</groupId>
-        <artifactId>podam</artifactId>
-        <version>${version.uk.co.jemos.podam}</version>
+        <groupId>io.github.jinahya</groupId>
+        <artifactId>jinahya-persistence-utils</artifactId>
+        <version>${version.jinahya-persistence}</version>
       </dependency>
       <dependency>
         <groupId>io.github.jinahya</groupId>
         <artifactId>jinahya-persistence-test-utils</artifactId>
         <version>${version.jinahya-persistence}</version>
       </dependency>
-      <!--
-        Lombok, pinned instead of left to the Boot BOM. This is the one place in this pom that
-        spells out a version the BOM already manages, and it is not a preference: the BOM's
-        1.18.46 cannot compile anything on the JDK this build runs on. Lombok reaches into javac
-        internals, so each new JDK needs a new lombok, and on JDK 27 that version dies in
-        testCompile with `ExceptionInInitializerError: com.sun.tools.javac.tree.EndPosTable`;
-        1.18.48 is the current release and handles it. Raise this when the JDK moves, never lower
-        it, and drop the pin once a Boot BOM manages 1.18.48 or later.
+      <dependency>
+        <groupId>uk.co.jemos.podam</groupId>
+        <artifactId>podam</artifactId>
+        <version>${version.uk.co.jemos.podam}</version>
+      </dependency>
 
-        A directly declared entry wins over one arriving through <scope>import</scope> whichever
-        comes first, so this beats spring-boot-dependencies above. It is also where the
-        version-less <path> in the maven-compiler-plugin configuration below reads its version.
+      <!--
+        Pinned over the BOM's 1.18.46, which fails on JDK 27 (ExceptionInInitializerError:
+        com.sun.tools.javac.tree.EndPosTable). Raise it with the JDK; drop the pin once the BOM
+        manages 1.18.48 or later. A direct entry beats an imported one.
         -->
       <dependency>
         <groupId>org.projectlombok</groupId>
@@ -190,90 +166,66 @@
       </dependency>
     </dependencies>
   </dependencyManagement>
-  <!--
-    Every schema module is the same shape - Spring Data JPA over one entity module - so what they share
-    is declared once here, and a module's own pom names only its schema artifact.
-    -->
+
+  <!-- What every schema module shares; a module's own pom names only its schema artifacts. -->
   <dependencies>
+    <!-- main ======================================================================================= -->
     <dependency>
       <groupId>org.springframework.boot</groupId>
       <artifactId>spring-boot-starter-data-jpa</artifactId>
+      <scope>provided</scope>
     </dependency>
-    <dependency>
-      <groupId>org.springframework.boot</groupId>
-      <artifactId>spring-boot-starter-test</artifactId>
-      <scope>test</scope>
-    </dependency>
-    <!--
-      Boot 4 broke the test slices out of spring-boot-test-autoconfigure into one module per
-      technology, so @DataJpaTest is no longer something spring-boot-starter-test carries: it lives
-      in spring-boot-data-jpa-test, which this starter brings along with @AutoConfigureTestDatabase
-      (spring-boot-jdbc-test) and TestEntityManager (spring-boot-jpa-test). The classic aggregate
-      is still published as spring-boot-starter-test-classic; prefer the per-slice starter.
 
-      NOTE: @DataJpaTest still implies @AutoConfigureTestDatabase, whose `replace` now defaults to
-      Replace.NON_TEST, meaning it swaps the auto-configured DataSource for an embedded one rather
-      than using the schema module's own. See the H2 entry below for which of the two a given slice
-      test gets and how to say so.
+    <!--
+      test starters ==============================================================================
+      Boot 4 pairs each starter with a spring-boot-starter-<technology>-test, and each of those brings
+      spring-boot-starter-test, so that one is not declared.
       -->
+    <!-- @DataJpaTest, @AutoConfigureTestDatabase, TestEntityManager -->
     <dependency>
       <groupId>org.springframework.boot</groupId>
       <artifactId>spring-boot-starter-data-jpa-test</artifactId>
       <scope>test</scope>
     </dependency>
     <!--
-      H2, the in-memory half of the story. Upstream runs the same entities two ways: `__co_testPU`
-      against H2 and `__co_itPU` against the installed schema, and this is what lets a module here
-      do the same. It is also what @AutoConfigureTestDatabase looks for: with no embedded database
-      on the classpath, its Replace.NON_TEST default has nothing to replace the DataSource with and
-      fails outright.
+      Jackson 3, for an injected JsonMapper. Not part of the @DataJpaTest slice, so only a
+      @SpringBootTest gets one.
+      -->
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-jackson-test</artifactId>
+      <scope>test</scope>
+    </dependency>
 
-      Version from the imported Boot BOM (h2.version). Test scope only: nothing in src/main knows
-      about a database.
-
-      NOTE: putting H2 here changes what a bare @DataJpaTest does. It no longer fails; it quietly
-      swaps H2 in for the Oracle DataSource, and the schema module's own application.yaml follows it
-      there, so `hibernate.default_schema: CO` and `ddl-auto: none` then mean an empty H2 with no
-      CO schema in it ("Schema CO not found"). Pick one deliberately, per test:
-
-        @DataJpaTest(properties = {"spring.jpa.properties.hibernate.default_schema=",
-                                   "spring.jpa.hibernate.ddl-auto=create-drop"})   generated H2
-        @DataJpaTest @AutoConfigureTestDatabase(replace = Replace.NONE)            installed schema
+    <!--
+      test runtime ===============================================================================
+      The embedded database @DataJpaTest swaps in for Oracle. Without one on the classpath,
+      @AutoConfigureTestDatabase fails. The Oracle driver is per module.
       -->
     <dependency>
       <groupId>com.h2database</groupId>
       <artifactId>h2</artifactId>
       <scope>test</scope>
     </dependency>
-    <!--
-      Lombok, for the test sources only, the way the upstream project scopes it. It stays out of
-      src/main deliberately: the entities it wraps are hand written and standalone by design, and a
-      published artifact should not ask its consumers to think about a compile-time-only processor.
 
-      Version comes from this pom's own dependencyManagement rather than the BOM, for the reason
-      given up there. Being a dependency puts the annotations on the test compile classpath;
-      running the processor needs the maven-compiler-plugin configuration further down as well.
-      -->
+    <!-- test tools ================================================================================= -->
+    <!-- Test sources only, as upstream does. -->
     <dependency>
       <groupId>org.projectlombok</groupId>
       <artifactId>lombok</artifactId>
       <scope>test</scope>
     </dependency>
-    <!--
-      The same test utilities the upstream project uses, on the same version property name, so that
-      a test written there moves here unchanged. Note the groupId is io.github.jinahya, not the
-      com.github.jinahya this project publishes under.
-      -->
+    <dependency>
+      <groupId>io.github.jinahya</groupId>
+      <artifactId>jinahya-persistence-utils</artifactId>
+      <scope>test</scope>
+    </dependency>
     <dependency>
       <groupId>io.github.jinahya</groupId>
       <artifactId>jinahya-persistence-test-utils</artifactId>
       <scope>test</scope>
     </dependency>
-    <!--
-      podam, what the randomizers of the upstream test-companion jars fill instances with: they extend
-      PodamObjectRandomizer, from the jinahya-object-randomizer that jinahya-persistence-test-utils
-      brings. The companion jars carry no dependencies of their own, so every module needs it here.
-      -->
+    <!-- What the upstream randomizers fill instances with. -->
     <dependency>
       <groupId>uk.co.jemos.podam</groupId>
       <artifactId>podam</artifactId>
@@ -294,15 +246,8 @@
     </pluginManagement>
     <plugins>
       <!--
-        Lombok is test scope, so it is the test sources that need it on the annotation processor
-        path, and only they. Hence the configuration sits on the default-testCompile execution
-        rather than on the plugin: `annotationProcessorPaths` switches processor discovery off for
-        anything outside the paths it lists, and src/main has nothing to discover here (the static
-        metamodel is generated upstream and arrives inside the entity jars, already compiled).
-
-        The <path> carries no <version> on purpose. Since 3.12.0 the plugin falls back to
-        dependencyManagement for it, which here means the pinned entry above, so the processor that
-        runs and the annotations that are compiled against can never drift apart.
+        Lombok on the test sources' processor path only. The <path> takes its version from
+        dependencyManagement, so the processor and the annotations stay in step.
         -->
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>

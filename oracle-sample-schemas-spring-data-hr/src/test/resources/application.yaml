@@ -1,0 +1,86 @@
+#
+# Test configuration for oracle-sample-schemas-spring-data-hr: the HR schema of the physical database that
+# oracle-sample-schemas-persistence brings up, not an in-memory stand-in.
+#
+# Start it from the sibling checkout, which owns the compose file and the install hook:
+#
+#     cd ../oracle-sample-schemas-persistence && ./docker-compose-up.sh
+#
+# That runs container-registry.oracle.com/database/free:latest-lite as the container
+# `oracle-sample-schemas`, publishes 1521, and installs CO/HR/SH into the freepdb1 PDB once
+# (opt/oracle/scripts/startup). The database lives in a bind mount, so it survives a restart
+# and the hook skips schemas that are already there.
+#
+# These are the same coordinates hr's own integration-test persistence unit uses
+# (../oracle-sample-schemas-persistence/hr/src/test/resources/META-INF/persistence.xml,
+# `__hr_itPU`); keep the two in step.
+#
+spring:
+  datasource:
+    url: jdbc:oracle:thin:@//localhost:1521/freepdb1
+    # `dmlonly`, created by the same startup hook, holds CREATE SESSION plus SELECT/INSERT/
+    # UPDATE/DELETE ANY TABLE and nothing else: a test can read and write the sample data but
+    # cannot DDL it away. HR's own password is this same one, and connecting as HR would make
+    # the default_schema below unnecessary -- it would also give the tests the right to drop
+    # the schema they are reading, which is the point of not doing it.
+    username: dmlonly
+    # Both the container and the installers default to `password`; SAMPLE_SCHEMAS_PASSWORD is
+    # the knob the sibling scripts read, so honour it here too.
+    password: ${SAMPLE_SCHEMAS_PASSWORD:password}
+    # Hikari can infer this from the URL; named anyway so a missing ojdbc17 on the test
+    # classpath fails as "driver not found" rather than as a pool timeout.
+    driver-class-name: oracle.jdbc.OracleDriver
+
+  jpa:
+    hibernate:
+      # The sample data is installed by Oracle's own scripts and is the fixture the tests read.
+      # Nothing here may touch the schema. `none` is already the default for a non-embedded
+      # datasource; spelled out because the cost of getting it wrong is HR.
+      ddl-auto: none
+    properties:
+      hibernate:
+        # The upstream entities map UNQUALIFIED table names on purpose, so that nothing in
+        # their src/main knows which schema it was installed into. Oracle resolves an
+        # unqualified name against the session's CURRENT_SCHEMA -- here DMLONLY, which owns no
+        # objects -- so without this every query is ORA-00942. Upstream says the same thing
+        # provider-neutrally, with <persistence-unit-defaults><schema>HR</schema> in
+        # hr/src/test/resources/META-INF/orm-it.xml; the Boot route to that file, should this
+        # ever need to run on a provider other than Hibernate, is spring.jpa.mapping-resources.
+        default_schema: HR
+        # Named rather than detected. Hibernate would otherwise pick the dialect from the JDBC
+        # metadata of a first connection, and when that connection fails (no container on 1521) it
+        # logs the real cause as HHH000342 and throws "Unable to determine Dialect" instead. With
+        # the dialect named, a missing database fails at the first query with the Oracle error
+        # itself. OracleDialect still reads the server version from that metadata when it can, so
+        # nothing version-specific is lost; Hibernate logs HHH90000025 to say this is redundant.
+        # NOTE: this file follows a @DataJpaTest onto H2 too, where this dialect is wrong; such a
+        # test has to override it along with default_schema.
+        dialect: org.hibernate.dialect.OracleDialect
+        format_sql: true
+        highlight_sql: true
+    # No web layer in these tests: a lazy association touched outside a transaction should fail
+    # loudly instead of quietly opening a session to satisfy it.
+    open-in-view: false
+    # Deliberately not `show-sql: true`, which writes straight to System.out and would print
+    # every statement twice next to the logger below.
+    show-sql: false
+
+logging:
+  level:
+    # The statement, and then its bind parameters -- the pair upstream's logback-test.xml turns
+    # on. Drop to `info` when the output gets in the way.
+    org.hibernate.SQL: debug
+    org.hibernate.orm.jdbc.bind: trace
+    # This module's own code, the tests included. Boot leaves everything not named here at the
+    # root's INFO, so a log.debug(...) in a test prints nothing without this.
+    com.github.jinahya.oracle.sample.schemas.persistence.hr.data: debug
+
+# NOTE for whatever configures the entity manager next: the same duplicate-entity problem as
+# every other schema here.
+# HR maps JOB_HISTORY twice, under one entity name: JobHistoryWithEmbeddedId and
+# JobHistoryWithIdClass.
+# The pair shares an entity name, so an @EntityScan over
+# com.github.jinahya.oracle.sample.schemas.persistence.hr
+# takes both and fails. ___Spring_TestContext in the test sources already declares the
+# ManagedClassNameFilter that drops the *WithIdClass flavour; a PersistenceManagedTypes bean is
+# the explicit-list alternative. Both are @ConditionalOnMissingBean in JpaBaseConfiguration.
