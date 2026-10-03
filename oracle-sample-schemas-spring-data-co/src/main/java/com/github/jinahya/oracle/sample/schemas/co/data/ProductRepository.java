@@ -2,9 +2,13 @@ package com.github.jinahya.oracle.sample.schemas.co.data;
 
 import com.github.jinahya.oracle.sample.schemas.persistence.co.Product;
 import com.github.jinahya.oracle.sample.schemas.persistence.co.Product_;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.stereotype.Repository;
+
+import java.math.BigDecimal;
 
 /**
  * A repository for {@link Product}, the {@code PRODUCTS} table of the Customer Orders schema.
@@ -17,9 +21,12 @@ import org.springframework.stereotype.Repository;
  * metamodel rather than by string, for example
  * {@code (root, query, builder) -> builder.equal(root.get(Product_.productName), name)}.
  * <p>
- * {@link Product} declares named queries too ({@code Product.selectListOrderByProductIdAsc} and
- * {@code Product.selectListOrderByProductIdAscProductIdGt}), but no method here runs them yet. One that does is named
- * after the query, as in {@link CustomerRepository}.
+ * {@link Product} declares named queries too ({@code Product.selectListOrderByProductIdAsc},
+ * {@code Product.selectListOrderByProductIdAscProductIdGt},
+ * {@code Product.selectListByUnitPriceBetweenOrderByUnitPricesAsc} and
+ * {@code Product.selectListByUnitPriceGreaterThanEqualAndUnitPriceLessThanOrderByUnitPricesAsc}), but no method here
+ * runs them yet. One that does is named after the query, as in {@link CustomerRepository}, and binds its parameters
+ * with {@code @Param}. The methods below derive their queries from their names instead.
  *
  * @see Product
  * @see Product_
@@ -29,4 +36,56 @@ public interface ProductRepository
         extends JpaRepository<Product, Long>,
                 JpaSpecificationExecutor<Product> {
 
+    /**
+     * Finds the products whose value of {@link Product_#UNIT_PRICE} attribute is between the specified bounds, both
+     * inclusive.
+     * <p>
+     * The query is derived from the method name, and {@code Between} renders as SQL {@code BETWEEN}, so a product
+     * priced at either bound is included. If {@code unitPriceMinInclusive} is greater than
+     * {@code unitPriceMaxInclusive}, nothing matches. A product with no unit price ({@code UNIT_PRICE} is nullable)
+     * never matches.
+     * <p>
+     * The page carries a count of all matches, which Spring Data gets with a second, {@code COUNT} query; it skips that
+     * query when the first page is not full. The query has no order of its own, so give {@code pageable} a sort, such
+     * as by {@link Product_#UNIT_PRICE}, or the pages are not stable.
+     *
+     * @param unitPriceMinInclusive the lower bound of the {@link Product_#UNIT_PRICE} attribute, inclusive; must not be
+     *                              {@code null}.
+     * @param unitPriceMaxInclusive the upper bound of the {@link Product_#UNIT_PRICE} attribute, inclusive; must not be
+     *                              {@code null}.
+     * @param pageable              the page to return, and its sort; {@link Pageable#unpaged()} for all matches in one
+     *                              page. Must not be {@code null}.
+     * @return a page of the products priced from {@code unitPriceMinInclusive} to {@code unitPriceMaxInclusive}.
+     * @see #findAllByUnitPriceGreaterThanEqualAndUnitPriceLessThan(BigDecimal, BigDecimal, Pageable)
+     */
+    Page<Product> findAllByUnitPriceBetween(BigDecimal unitPriceMinInclusive, BigDecimal unitPriceMaxInclusive,
+                                            Pageable pageable);
+
+    /**
+     * Finds the products whose value of {@link Product_#UNIT_PRICE} attribute is greater than or equal to
+     * {@code unitPriceMinInclusive} and less than {@code unitPriceMaxExclusive}.
+     * <p>
+     * The range is half-open, unlike {@link #findAllByUnitPriceBetween(BigDecimal, BigDecimal, Pageable)}: a product
+     * priced at {@code unitPriceMaxExclusive} is excluded. Consecutive ranges that share a bound, such as
+     * {@code [0, 10)} and {@code [10, 20)}, therefore never return the same product twice. If
+     * {@code unitPriceMinInclusive} is not less than {@code unitPriceMaxExclusive}, nothing matches. A product with no
+     * unit price never matches.
+     * <p>
+     * The page carries a count of all matches, which Spring Data gets with a second, {@code COUNT} query; it skips that
+     * query when the first page is not full. The query has no order of its own, so give {@code pageable} a sort, such
+     * as by {@link Product_#UNIT_PRICE}, or the pages are not stable.
+     *
+     * @param unitPriceMinInclusive the lower bound of the {@link Product_#UNIT_PRICE} attribute, inclusive; must not be
+     *                              {@code null}.
+     * @param unitPriceMaxExclusive the upper bound of the {@link Product_#UNIT_PRICE} attribute, exclusive; must not be
+     *                              {@code null}.
+     * @param pageable              the page to return, and its sort; {@link Pageable#unpaged()} for all matches in one
+     *                              page. Must not be {@code null}.
+     * @return a page of the products priced from {@code unitPriceMinInclusive}, inclusive, to
+     *         {@code unitPriceMaxExclusive}, exclusive.
+     * @see #findAllByUnitPriceBetween(BigDecimal, BigDecimal, Pageable)
+     */
+    Page<Product> findAllByUnitPriceGreaterThanEqualAndUnitPriceLessThan(BigDecimal unitPriceMinInclusive,
+                                                                         BigDecimal unitPriceMaxExclusive,
+                                                                         Pageable pageable);
 }

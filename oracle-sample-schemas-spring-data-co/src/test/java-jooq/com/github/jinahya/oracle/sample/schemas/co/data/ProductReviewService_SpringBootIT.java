@@ -166,7 +166,8 @@ class ProductReviewService_SpringBootIT {
 
     private static List<ProductReviewsRecord> rowsOf(final List<ProductReviewsRecord> records,
                                                      final List<String> productNames) {
-        return records.stream().filter(r -> productNames.contains(r.getProductName()))
+        return records.stream()
+                .filter(r -> productNames.contains(r.getProductName()))
                 .toList();
     }
 
