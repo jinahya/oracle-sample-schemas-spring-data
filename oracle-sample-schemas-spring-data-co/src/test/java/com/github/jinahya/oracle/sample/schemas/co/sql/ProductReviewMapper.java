@@ -1,5 +1,6 @@
-package com.github.jinahya.oracle.sample.schemas.co.data;
+package com.github.jinahya.oracle.sample.schemas.co.sql;
 
+import com.github.jinahya.oracle.sample.schemas.co.data.ProductReviewRepository;
 import com.github.jinahya.oracle.sample.schemas.persistence.co.ProductReview;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
@@ -10,11 +11,11 @@ import java.util.List;
  * A MyBatis mapper for the {@code PRODUCT_REVIEWS} view, the equivalent of {@link ProductReviewRepository}, for tests.
  * <p>
  * Its statements are in {@code ProductReviewMapper.xml}, in the same package under {@code src/test/resources}, where
- * MyBatis finds them by the interface's name. Boot's MyBatis auto-configuration registers this interface by its
- * {@link Mapper @Mapper}, in a {@code @SpringBootTest} only; the {@code @DataJpaTest} slice leaves MyBatis out.
+ * MyBatis finds them by the interface's name. {@link _Mapper_TestConfiguration} registers this interface by its
+ * {@link Mapper @Mapper}; a test {@code @Import}s it.
  * <p>
  * Each parameter is named with {@link Param @Param}: this build does not compile with {@code -parameters}, and the
- * statements bind by name. The statements are those of {@link ProductReviewRepositoryImpl}'s {@code .sql} resources,
+ * statements bind by name. The statements are those of {@code ProductReviewRepositoryImpl}'s {@code .sql} resources,
  * in MyBatis's {@code #{...}} placeholders.
  *
  * @see ProductReviewRepository

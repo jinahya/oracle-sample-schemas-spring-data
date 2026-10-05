@@ -74,6 +74,9 @@ logging:
     # This module's own code, the tests included. Boot leaves everything not named here at the
     # root's INFO, so a log.debug(...) in a test prints nothing without this.
     com.github.jinahya.oracle.sample.schemas.co.data: debug
+    # The MyBatis mappers and their tests. MyBatis logs each statement under its mapper's namespace,
+    # so this prints the SQL and the bind values of the mappers, too.
+    com.github.jinahya.oracle.sample.schemas.co.sql: debug
 
 # NOTE for whatever configures the entity manager next: this schema maps one table twice --
 # ORDER_ITEMS as OrderItemWithEmbeddedId/OrderItemWithIdClass. Upstream keeps the

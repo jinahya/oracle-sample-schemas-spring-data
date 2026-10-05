@@ -1,5 +1,8 @@
-package com.github.jinahya.oracle.sample.schemas.co.data;
+package com.github.jinahya.oracle.sample.schemas.co.sql;
 
+import com.github.jinahya.oracle.sample.schemas.co.data.ProductRepository;
+import com.github.jinahya.oracle.sample.schemas.co.data.ProductReviewRepository;
+import com.github.jinahya.oracle.sample.schemas.co.data.___Spring_TestContext;
 import com.github.jinahya.oracle.sample.schemas.persistence.co.ProductReview;
 import jakarta.persistence.EntityManager;
 import lombok.extern.slf4j.Slf4j;
@@ -7,6 +10,7 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.annotation.Import;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.tuple;
@@ -16,11 +20,13 @@ import static org.assertj.core.api.Assumptions.assumeThat;
  * Tests {@link ProductReviewMapper} against the installed CO schema, by comparing each of its statements with the
  * {@link ProductReviewRepository} method of the same name, which {@link ProductRepository} brings.
  * <p>
+ * This package is not under {@code …co.data}, so the context is named, not found by searching up the packages, and
+ * {@link _Mapper_TestConfiguration} registers the mapper.
+ * <p>
  * Needs the database of {@code application.yaml} up and the CO schema installed; see that file.
- *
- * @see ProductRepository_SpringBootIT
  */
-@SpringBootTest
+@Import(_Mapper_TestConfiguration.class)
+@SpringBootTest(classes = ___Spring_TestContext.class)
 @Slf4j
 class ProductReviewMapper_SpringBootIT {
 

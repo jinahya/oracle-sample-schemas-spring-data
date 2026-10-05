@@ -4,7 +4,7 @@
   Statements of ProductReviewMapper, the same as ProductReviewRepositoryImpl's .sql resources.
   The view is qualified with its schema: hibernate.default_schema does not reach MyBatis.
   -->
-<mapper namespace="com.github.jinahya.oracle.sample.schemas.co.data.ProductReviewMapper">
+<mapper namespace="com.github.jinahya.oracle.sample.schemas.co.sql.ProductReviewMapper">
 
   <!-- ProductReview has a protected constructor only, which MyBatis calls reflectively, and setters. -->
   <resultMap id="productReview" type="com.github.jinahya.oracle.sample.schemas.persistence.co.ProductReview">
