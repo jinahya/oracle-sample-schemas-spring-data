@@ -34,7 +34,8 @@ import java.math.BigDecimal;
 @Repository
 public interface ProductRepository
         extends JpaRepository<Product, Long>,
-                JpaSpecificationExecutor<Product> {
+                JpaSpecificationExecutor<Product>,
+                ProductReviewRepository {
 
     /**
      * Finds the products whose value of {@link Product_#UNIT_PRICE} attribute is between the specified bounds, both

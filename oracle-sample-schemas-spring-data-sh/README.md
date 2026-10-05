@@ -12,14 +12,14 @@ Package: `com.github.jinahya.oracle.sample.schemas.persistence.sh.data`
 |---|---|---|---|
 | `CalMonthSalesMvRepository` | `CalMonthSalesMv` | `CAL_MONTH_SALES_MV` | `String` |
 | `ChannelRepository` | `Channel` | `CHANNELS` | `Long` |
-| `CostWithEmbeddedIdRepository` | `CostWithEmbeddedId` | `COSTS` | `CostId` |
+| `CostRepository` | `Cost` | `COSTS` | `CostId` |
 | `CountryRepository` | `Country` | `COUNTRIES` | `Long` |
 | `CustomerRepository` | `Customer` | `CUSTOMERS` | `Long` |
-| `FweekPscatSalesMvWithEmbeddedIdRepository` | `FweekPscatSalesMvWithEmbeddedId` | `FWEEK_PSCAT_SALES_MV` | `FweekPscatSalesMvId` |
+| `FweekPscatSalesMvRepository` | `FweekPscatSalesMv` | `FWEEK_PSCAT_SALES_MV` | `FweekPscatSalesMvId` |
 | `ProductRepository` | `Product` | `PRODUCTS` | `Integer` |
-| `ProfitWithEmbeddedIdRepository` | `ProfitWithEmbeddedId` | `PROFITS` | `ProfitId` |
+| `ProfitRepository` | `Profit` | `PROFITS` | `ProfitId` |
 | `PromotionRepository` | `Promotion` | `PROMOTIONS` | `Integer` |
-| `SaleWithEmbeddedIdRepository` | `SaleWithEmbeddedId` | `SALES` | `SaleId` |
+| `SaleRepository` | `Sale` | `SALES` | `SaleId` |
 | `SupplementaryDemographicsRepository` | `SupplementaryDemographics` | `SUPPLEMENTARY_DEMOGRAPHICS` | `Long` |
 | `TimeRepository` | `Time` | `TIMES` | `LocalDate` |
 
@@ -29,10 +29,6 @@ Each extends `JpaRepository` and `JpaSpecificationExecutor`, and declares no met
 
 Spring Data JPA is a `provided` dependency, so add `spring-boot-starter-data-jpa` yourself, and point entity scanning
 at `com.github.jinahya.oracle.sample.schemas.persistence.sh.__NoOp`.
-
-`COSTS`, `SALES`, `PROFITS` and `FWEEK_PSCAT_SALES_MV` are each mapped twice (`*WithEmbeddedId` and `*WithIdClass`).
-Both load, each under its own entity name; the test context keeps one per table by dropping `*WithIdClass` with a
-`ManagedClassNameFilter`.
 
 ## Tests
 

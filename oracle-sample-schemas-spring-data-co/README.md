@@ -16,7 +16,7 @@ Package: `com.github.jinahya.oracle.sample.schemas.co.data`
 | `OrderRepository`                    | `Order`                      | `ORDERS`                  | `Long`           |
 | `OrderItemWithEmbeddedIdRepository`  | `OrderItemWithEmbeddedId`    | `ORDER_ITEMS`             | `OrderItemId`    |
 | `ProductRepository`                  | `Product`                    | `PRODUCTS`                | `Long`           |
-| `ProductOrderWithEmbeddedIdRepository` | `ProductOrderWithEmbeddedId` | `PRODUCT_ORDERS`        | `ProductOrderId` |
+| `ProductOrderRepository`             | `ProductOrder`               | `PRODUCT_ORDERS`          | `ProductOrderId` |
 | `ShipmentRepository`                 | `Shipment`                   | `SHIPMENTS`               | `Long`           |
 | `StoreRepository`                    | `Store`                      | `STORES`                  | `Long`           |
 
@@ -53,11 +53,10 @@ this package, so point entity scanning at them:
 @EnableJpaRepositories(basePackageClasses = CustomerRepository.class)
 ```
 
-`ORDER_ITEMS` and `PRODUCT_ORDERS` are each mapped twice (`*WithEmbeddedId` and `*WithIdClass`); both load, but you
-will usually want only one of them.
+`ORDER_ITEMS` is mapped twice (`OrderItemWithEmbeddedId` and `OrderItemWithIdClass`); both load, but you will
+usually want only one of them. The test context drops `*WithIdClass` with a `ManagedClassNameFilter`.
 
-The views with no key (`PRODUCT_REVIEWS`, `STORE_ORDERS`) have no entity and no repository; the tests read them
-with jOOQ, through `ProductReviewService` and `StoreOrderService` under `src/test/java-jooq`.
+The views with no key (`PRODUCT_REVIEWS`, `STORE_ORDERS`) have no entity and no repository.
 
 ## Tests
 

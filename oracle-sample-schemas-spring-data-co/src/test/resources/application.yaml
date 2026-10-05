@@ -75,9 +75,8 @@ logging:
     # root's INFO, so a log.debug(...) in a test prints nothing without this.
     com.github.jinahya.oracle.sample.schemas.co.data: debug
 
-# NOTE for whatever configures the entity manager next: this schema maps two tables twice, under
-# one entity name each -- ORDER_ITEMS as OrderItemWithEmbeddedId/OrderItemWithIdClass, and
-# PRODUCT_ORDERS as ProductOrdersWithEmbeddedId/ProductOrdersWithIdClass. Upstream keeps the
+# NOTE for whatever configures the entity manager next: this schema maps one table twice --
+# ORDER_ITEMS as OrderItemWithEmbeddedId/OrderItemWithIdClass. Upstream keeps the
 # flavours apart with <exclude-unlisted-classes>true</exclude-unlisted-classes> and one <class>
 # list per unit, and an @EntityScan over com.github.jinahya.oracle.sample.schemas.persistence.co takes both
 # and fails as a duplicate entity name. There is no property for it, but two beans do the job:

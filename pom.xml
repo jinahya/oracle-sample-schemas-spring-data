@@ -83,21 +83,13 @@
     <version.org.projectlombok>1.18.48</version.org.projectlombok>
 
     <!--
-      jOOQ code generation; see the jooq-codegen profile. A BOM import carries no plugin versions,
-      so these restate Boot's jooq.version and oracle-database.version; keep them in step.
+      Not in Boot's BOM. mybatis-spring-boot 4.1.0 is built against Boot 4.1.0, MyBatis 3.5.19 and
+      mybatis-spring 4.1.0.
+      https://central.sonatype.com/artifact/org.mybatis.spring.boot/mybatis-spring-boot-starter/versions
       -->
-    <version.jooq-codegen-maven>3.21.7</version.jooq-codegen-maven>
-    <version.jooq-codegen.ojdbc>23.26.3.0.0</version.jooq-codegen.ojdbc>
-    <!-- Boot's build-helper-maven-plugin.version, for the same reason. -->
-    <version.build-helper-maven-plugin>3.6.1</version.build-helper-maven-plugin>
-    <!-- The database of application.yaml. Override any of them with -D. -->
-    <jooq-codegen.url>jdbc:oracle:thin:@//localhost:1521/freepdb1</jooq-codegen.url>
-    <jooq-codegen.user>dmlonly</jooq-codegen.user>
-    <jooq-codegen.password>password</jooq-codegen.password>
-    <!-- On in a schema module only, which also sets jooq-codegen.inputSchema and .packageName. -->
-    <jooq-codegen.skip>true</jooq-codegen.skip>
-    <!-- Objects of the schema not to generate, a regular expression; none by default. -->
-    <jooq-codegen.excludes></jooq-codegen.excludes>
+    <version.org.mybatis.spring.boot>4.1.0</version.org.mybatis.spring.boot>
+    <!-- https://central.sonatype.com/artifact/org.mybatis/mybatis-spring/versions -->
+    <version.org.mybatis.mybatis-spring>4.1.0</version.org.mybatis.mybatis-spring>
   </properties>
 
   <dependencyManagement>
@@ -181,15 +173,53 @@
         <artifactId>lombok</artifactId>
         <version>${version.org.projectlombok}</version>
       </dependency>
+
+      <dependency>
+        <groupId>org.mybatis</groupId>
+        <artifactId>mybatis-spring</artifactId>
+        <version>${version.org.mybatis.mybatis-spring}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.mybatis.spring.boot</groupId>
+        <artifactId>mybatis-spring-boot-starter</artifactId>
+        <version>${version.org.mybatis.spring.boot}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.mybatis.spring.boot</groupId>
+        <artifactId>mybatis-spring-boot-starter-test</artifactId>
+        <version>${version.org.mybatis.spring.boot}</version>
+      </dependency>
     </dependencies>
   </dependencyManagement>
 
   <!-- What every schema module shares; a module's own pom names only its schema artifacts. -->
   <dependencies>
-    <!-- main ======================================================================================= -->
+    <!--
+      main =======================================================================================
+      The plain artifacts, not spring-boot-starter-data-jpa: the repositories need Spring Data JPA, not
+      Boot, so the published pom names no starter. It is provided; a consumer brings its own Spring Data
+      JPA and JPA provider. The starter reaches the tests through spring-boot-starter-data-jpa-test.
+
+      jakarta.persistence-api is declared, provided, since main code uses JPA types itself
+      (_NonEntityRepositoryImpl's EntityManager); spring-data-jpa does not bring it.
+      -->
     <dependency>
-      <groupId>org.springframework.boot</groupId>
-      <artifactId>spring-boot-starter-data-jpa</artifactId>
+      <groupId>org.springframework.data</groupId>
+      <artifactId>spring-data-jpa</artifactId>
+      <scope>provided</scope>
+    </dependency>
+    <dependency>
+      <groupId>jakarta.persistence</groupId>
+      <artifactId>jakarta.persistence-api</artifactId>
+      <scope>provided</scope>
+    </dependency>
+    <!--
+      Main and test sources alike. Provided: Lombok is a compile-time tool only, so it is neither
+      packaged nor passed on to consumers of these jars.
+      -->
+    <dependency>
+      <groupId>org.projectlombok</groupId>
+      <artifactId>lombok</artifactId>
       <scope>provided</scope>
     </dependency>
 
@@ -214,19 +244,23 @@
       <scope>test</scope>
     </dependency>
     <!--
-      jOOQ, test scope only, at the version Boot manages: a DSLContext on the test DataSource, and
-      @JooqTest. The open source edition has no Oracle dialect, so against the installed schema it
-      renders SQLDialect.DEFAULT.
+      MyBatis, test scope only: native SQL against Oracle, where jOOQ's open source edition has no
+      dialect. mybatis-spring is what mappers compile against; the starter brings it too.
       -->
     <dependency>
-      <groupId>org.springframework.boot</groupId>
-      <artifactId>spring-boot-starter-jooq-test</artifactId>
+      <groupId>org.mybatis</groupId>
+      <artifactId>mybatis-spring</artifactId>
       <scope>test</scope>
     </dependency>
-    <!-- Lets jOOQ map results into classes annotated with @Column, such as upstream's ProductReviews. -->
     <dependency>
-      <groupId>org.jooq</groupId>
-      <artifactId>jooq-jpa-extensions</artifactId>
+      <groupId>org.mybatis.spring.boot</groupId>
+      <artifactId>mybatis-spring-boot-starter</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <!-- @MybatisTest -->
+    <dependency>
+      <groupId>org.mybatis.spring.boot</groupId>
+      <artifactId>mybatis-spring-boot-starter-test</artifactId>
       <scope>test</scope>
     </dependency>
 
@@ -242,12 +276,6 @@
     </dependency>
 
     <!-- test tools ================================================================================= -->
-    <!-- Test sources only, as upstream does. -->
-    <dependency>
-      <groupId>org.projectlombok</groupId>
-      <artifactId>lombok</artifactId>
-      <scope>test</scope>
-    </dependency>
     <dependency>
       <groupId>io.github.jinahya</groupId>
       <artifactId>jinahya-persistence-utils</artifactId>
@@ -279,151 +307,23 @@
     </pluginManagement>
     <plugins>
       <!--
-        Lombok on the test sources' processor path only. The <path> takes its version from
-        dependencyManagement, so the processor and the annotations stay in step.
+        Lombok on the processor path of both executions, default-compile and default-testCompile.
+        The <path> takes its version from dependencyManagement, so the processor and the
+        annotations stay in step.
         -->
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-compiler-plugin</artifactId>
-        <executions>
-          <execution>
-            <id>default-testCompile</id>
-            <configuration>
-              <annotationProcessorPaths>
-                <path>
-                  <groupId>org.projectlombok</groupId>
-                  <artifactId>lombok</artifactId>
-                </path>
-              </annotationProcessorPaths>
-            </configuration>
-          </execution>
-        </executions>
-      </plugin>
-      <!-- src/test/java-jooq, the committed output of the jooq-codegen profile, as a test source root. -->
-      <plugin>
-        <groupId>org.codehaus.mojo</groupId>
-        <artifactId>build-helper-maven-plugin</artifactId>
-        <version>${version.build-helper-maven-plugin}</version>
-        <executions>
-          <execution>
-            <id>add-test-source-jooq</id>
-            <phase>generate-test-sources</phase>
-            <goals>
-              <goal>add-test-source</goal>
-            </goals>
-            <configuration>
-              <sources>
-                <source>${project.basedir}/src/test/java-jooq</source>
-              </sources>
-            </configuration>
-          </execution>
-        </executions>
+        <configuration>
+          <annotationProcessorPaths>
+            <path>
+              <groupId>org.projectlombok</groupId>
+              <artifactId>lombok</artifactId>
+            </path>
+          </annotationProcessorPaths>
+        </configuration>
       </plugin>
     </plugins>
   </build>
 
-  <profiles>
-    <!--
-      Generates jOOQ classes for a schema's tables and views from the live database, by hand:
-
-        mvn -P jooq-codegen -pl oracle-sample-schemas-spring-data-co generate-test-sources
-
-      The output goes into src/test/java-jooq, a test source root of its own, and is committed: the
-      schema is Oracle's, not ours, and a normal build must not need the database. jOOQ empties the
-      target package on every run, so nothing hand-written belongs there.
-
-      JDBCDatabase reads the generic JDBC metadata, which the open source edition supports for any
-      database: tables, views, columns, keys, indexes. Oracle's own reader is commercial. Names are
-      generated schema-qualified (CO.CUSTOMERS), as dmlonly has to address them.
-      -->
-    <profile>
-      <id>jooq-codegen</id>
-      <build>
-        <plugins>
-          <plugin>
-            <groupId>org.jooq</groupId>
-            <artifactId>jooq-codegen-maven</artifactId>
-            <version>${version.jooq-codegen-maven}</version>
-            <executions>
-              <execution>
-                <id>jooq-codegen</id>
-                <phase>generate-test-sources</phase>
-                <goals>
-                  <goal>generate</goal>
-                </goals>
-              </execution>
-            </executions>
-            <dependencies>
-              <dependency>
-                <groupId>com.oracle.database.jdbc</groupId>
-                <artifactId>ojdbc17</artifactId>
-                <version>${version.jooq-codegen.ojdbc}</version>
-              </dependency>
-            </dependencies>
-            <configuration>
-              <skip>${jooq-codegen.skip}</skip>
-              <onError>FAIL</onError>
-              <!-- LOG, the default: one set of forcedTypes serves all schemas, so some go unused. -->
-              <onUnused>LOG</onUnused>
-              <jdbc>
-                <driver>oracle.jdbc.OracleDriver</driver>
-                <url>${jooq-codegen.url}</url>
-                <user>${jooq-codegen.user}</user>
-                <password>${jooq-codegen.password}</password>
-              </jdbc>
-              <generator>
-                <database>
-                  <name>org.jooq.meta.jdbc.JDBCDatabase</name>
-                  <inputSchema>${jooq-codegen.inputSchema}</inputSchema>
-                  <includes>.*</includes>
-                  <excludes>${jooq-codegen.excludes}</excludes>
-                  <!--
-                    JDBCDatabase reports Oracle's type names, which the open source edition does not
-                    know; unmapped, every column would be SQLDataType.OTHER, i.e. Object. These map
-                    them to standard types; the first match wins.
-
-                    It reports no precision or scale either (every NUMBER is NUMBER(0, 0)), so an
-                    integer NUMBER cannot be told from a decimal one by its type. A NUMBER is a
-                    BigDecimal, then, except an *_ID column, which in these schemas is always a whole
-                    number key.
-                    -->
-                  <forcedTypes>
-                    <forcedType>
-                      <name>BIGINT</name>
-                      <includeTypes>NUMBER</includeTypes>
-                      <includeExpression>.*_ID</includeExpression>
-                    </forcedType>
-                    <forcedType>
-                      <name>NUMERIC</name>
-                      <includeTypes>NUMBER|FLOAT|BINARY_(FLOAT|DOUBLE)</includeTypes>
-                    </forcedType>
-                    <forcedType>
-                      <name>VARCHAR</name>
-                      <includeTypes>N?VARCHAR2.*|N?CHAR.*</includeTypes>
-                    </forcedType>
-                    <forcedType>
-                      <name>TIMESTAMP</name>
-                      <includeTypes>DATE|TIMESTAMP.*</includeTypes>
-                    </forcedType>
-                    <forcedType>
-                      <name>BLOB</name>
-                      <includeTypes>BLOB|RAW.*|LONG RAW</includeTypes>
-                    </forcedType>
-                    <forcedType>
-                      <name>CLOB</name>
-                      <includeTypes>N?CLOB</includeTypes>
-                    </forcedType>
-                  </forcedTypes>
-                </database>
-                <target>
-                  <packageName>${jooq-codegen.packageName}</packageName>
-                  <directory>${project.basedir}/src/test/java-jooq</directory>
-                </target>
-              </generator>
-            </configuration>
-          </plugin>
-        </plugins>
-      </build>
-    </profile>
-  </profiles>
 </project>

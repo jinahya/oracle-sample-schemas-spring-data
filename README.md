@@ -45,15 +45,6 @@ mvn -pl oracle-sample-schemas-spring-data-co -Dtest='*_SpringBootIT' test
 
 The tests connect as `dmlonly` (DML only) and never generate DDL.
 
-### jOOQ classes (tests only)
-
-Each module has jOOQ classes, generated from the live schema, under `src/test/java-jooq`. Regenerate them with the
-container running:
-
-```sh
-./_mvn_jooq-codegen.sh
-```
-
 ## Links
 
 ### [Spring Data JPA](https://docs.spring.io/spring-data/jpa/reference/)

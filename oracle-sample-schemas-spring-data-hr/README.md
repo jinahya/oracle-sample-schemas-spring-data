@@ -15,7 +15,7 @@ Package: `com.github.jinahya.oracle.sample.schemas.persistence.hr.data`
 | `EmpDetailsViewRepository` | `EmpDetailsView` | `EMP_DETAILS_VIEW` | `Integer` |
 | `EmployeeRepository` | `Employee` | `EMPLOYEES` | `Integer` |
 | `JobRepository` | `Job` | `JOBS` | `String` |
-| `JobHistoryWithEmbeddedIdRepository` | `JobHistoryWithEmbeddedId` | `JOB_HISTORY` | `JobHistoryId` |
+| `JobHistoryRepository` | `JobHistory` | `JOB_HISTORY` | `JobHistoryId` |
 | `LocationRepository` | `Location` | `LOCATIONS` | `Integer` |
 | `RegionRepository` | `Region` | `REGIONS` | `Long` |
 
@@ -25,10 +25,6 @@ Each extends `JpaRepository` and `JpaSpecificationExecutor`, and declares no met
 
 Spring Data JPA is a `provided` dependency, so add `spring-boot-starter-data-jpa` yourself, and point entity scanning
 at `com.github.jinahya.oracle.sample.schemas.persistence.hr.__NoOp`.
-
-`JOB_HISTORY` is mapped twice (`JobHistoryWithEmbeddedId` and `JobHistoryWithIdClass`) under the same entity name, so
-scanning both fails as a duplicate. Exclude one of them, as the test context does with a `ManagedClassNameFilter`
-that drops `*WithIdClass`.
 
 ## Tests
 

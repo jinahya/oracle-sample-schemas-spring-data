@@ -13,8 +13,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 /**
  * Tests {@link ___Spring_TestContext}, which is all this module has to test until it declares repositories.
  * <p>
- * Booting proves that the {@code @EntityScan} finds the entities one package up in the upstream jar, and that the
- * {@code ManagedClassNameFilter} keeps the persistence unit free of duplicate entity names.
+ * Booting proves that the {@code @EntityScan} finds the entities one package up in the upstream jar.
  * <p>
  * It does <em>not</em> prove that the database is reachable. {@code application.yaml} names the dialect, so Hibernate
  * only logs a failed metadata connection ({@code HHH000342}) and starts anyway. Nothing here runs a query, so this test
@@ -34,18 +33,19 @@ class SpringTestContext_SpringBootTest {
     class Metamodel_Test {
 
         /**
-         * Asserts that the persistence unit holds entities, and only one flavour of each twice-mapped table.
+         * Asserts that the persistence unit holds entities, among them the composite-key ones.
          * <p>
-         * HR maps JOB_HISTORY twice over, one {@code @EmbeddedId} flavour and one {@code @IdClass} flavour sharing an
-         * entity name, which is a duplicate the unit cannot hold both of. An empty metamodel would mean the scan found
-         * nothing; a {@code *WithIdClass} in it would mean the {@code ManagedClassNameFilter} is not being applied.
+         * Upstream used to map JOB_HISTORY twice, and this module had to keep one flavour of each out of the unit.
+         * Each is now mapped once, as {@code JobHistory}, so the scan takes everything. An empty metamodel would mean the
+         * scan found nothing.
          */
         @Test
         void __() {
             final var managedTypes = entityManagerFactory.getMetamodel().getManagedTypes();
             assertThat(managedTypes)
                     .isNotEmpty()
-                    .noneMatch(t -> t.getJavaType().getSimpleName().endsWith("WithIdClass"));
+                    .extracting(t -> t.getJavaType().getSimpleName())
+                    .contains("JobHistory");
         }
     }
 

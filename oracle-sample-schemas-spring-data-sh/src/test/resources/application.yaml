@@ -75,14 +75,3 @@ logging:
     # root's INFO, so a log.debug(...) in a test prints nothing without this.
     com.github.jinahya.oracle.sample.schemas.persistence.sh.data: debug
 
-# NOTE for whatever configures the entity manager next: the same duplicate-entity problem as
-# every other schema here.
-# SH maps four tables twice, under one entity name each: COSTS as CostWithEmbeddedId /
-# CostWithIdClass, SALES as SaleWithEmbeddedId / SaleWithIdClass, PROFITS as
-# ProfitsWithEmbeddedId / ProfitsWithIdClass, and FWEEK_PSCAT_SALES_MV as
-# FweekPscatSalesMvWithEmbeddedId / FweekPscatSalesMvWithIdClass.
-# The pair shares an entity name, so an @EntityScan over
-# com.github.jinahya.oracle.sample.schemas.persistence.sh
-# takes both and fails. ___Spring_TestContext in the test sources already declares the
-# ManagedClassNameFilter that drops the *WithIdClass flavour; a PersistenceManagedTypes bean is
-# the explicit-list alternative. Both are @ConditionalOnMissingBean in JpaBaseConfiguration.

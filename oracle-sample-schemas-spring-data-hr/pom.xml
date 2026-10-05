@@ -14,13 +14,6 @@
 
   <description>Spring Data for the human_resources schema</description>
 
-  <properties>
-    <!-- See the jooq-codegen profile of the root pom. -->
-    <jooq-codegen.skip>false</jooq-codegen.skip>
-    <jooq-codegen.inputSchema>HR</jooq-codegen.inputSchema>
-    <jooq-codegen.packageName>com.github.jinahya.oracle.sample.schemas.persistence.hr.data.jooq</jooq-codegen.packageName>
-  </properties>
-
   <dependencies>
     <!-- main ======================================================================================= -->
     <dependency>

@@ -14,15 +14,6 @@
 
   <description>Spring Data for the sales_history schema</description>
 
-  <properties>
-    <!-- See the jooq-codegen profile of the root pom. -->
-    <jooq-codegen.skip>false</jooq-codegen.skip>
-    <jooq-codegen.inputSchema>SH</jooq-codegen.inputSchema>
-    <!-- Oracle Text's tables for the index on SUPPLEMENTARY_DEMOGRAPHICS, not part of the schema. -->
-    <jooq-codegen.excludes>DR\$.*</jooq-codegen.excludes>
-    <jooq-codegen.packageName>com.github.jinahya.oracle.sample.schemas.persistence.sh.data.jooq</jooq-codegen.packageName>
-  </properties>
-
   <dependencies>
     <!-- main ======================================================================================= -->
     <dependency>

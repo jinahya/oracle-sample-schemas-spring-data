@@ -20,11 +20,11 @@ import org.springframework.orm.jpa.persistenceunit.ManagedClassNameFilter;
 public class ___Spring_TestContext {
 
     /**
-     * Drops the {@code @IdClass} flavour of every twice-mapped table from the scan.
+     * Drops the {@code @IdClass} flavour of {@code ORDER_ITEMS} from the scan.
      * <p>
-     * CO maps {@code ORDER_ITEMS} as both {@code OrderItemWithEmbeddedId} and {@code OrderItemWithIdClass}, and
-     * {@code PRODUCT_ORDERS} as both {@code ProductOrdersWithEmbeddedId} and {@code ProductOrdersWithIdClass}. The
-     * pairs share an entity name each, so a scan that takes both fails as a duplicate. Upstream separates them with
+     * CO maps {@code ORDER_ITEMS} twice, as {@code OrderItemWithEmbeddedId} and {@code OrderItemWithIdClass}; it is the
+     * only table upstream still maps both ways. The two have entity names of their own and both load, but this module
+     * keeps one, the one {@link OrderItemWithEmbeddedIdRepository} is for. Upstream separates them with
      * {@code <exclude-unlisted-classes>}; this is the Boot equivalent, and it is the hook {@code JpaBaseConfiguration}
      * hands its scanner.
      *

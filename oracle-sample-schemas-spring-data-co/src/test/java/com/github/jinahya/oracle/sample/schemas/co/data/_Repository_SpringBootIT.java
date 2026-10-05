@@ -2,13 +2,18 @@ package com.github.jinahya.oracle.sample.schemas.co.data;
 
 import com.github.jinahya.persistence.test.util.JinahyaPersistenceTestUtils;
 import com.github.jinahya.persistence.util.JinahyaEntityManagerFactoryUtils;
+import lombok.AccessLevel;
+import lombok.Getter;
+import lombok.experimental.Accessors;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.transaction.annotation.Transactional;
+import tools.jackson.databind.json.JsonMapper;
 
 import java.util.Optional;
 
@@ -120,4 +125,15 @@ abstract class _Repository_SpringBootIT<T extends JpaRepository<U, V>, U, V>
         assumeThat(selected).isNotEmpty();
         return selected.get();
     }
+
+    // -----------------------------------------------------------------------------------------------------------------
+
+    /**
+     * The JSON mapper of the context. It is here, not in {@link __Repository_TestBase}, because only a
+     * {@code @SpringBootTest} configures Jackson; the {@code @DataJpaTest} slice does not.
+     */
+    @Autowired
+    @Accessors(fluent = true)
+    @Getter(AccessLevel.PACKAGE)
+    private JsonMapper jsonMapper;
 }

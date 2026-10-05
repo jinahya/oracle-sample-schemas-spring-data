@@ -8,7 +8,6 @@ import lombok.Getter;
 import lombok.experimental.Accessors;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.jpa.repository.JpaRepository;
-import tools.jackson.databind.json.JsonMapper;
 
 import java.util.Objects;
 
@@ -98,10 +97,4 @@ abstract class __Repository_TestBase<T extends JpaRepository<U, V>, U, V> {
     @Accessors(fluent = true)
     @Getter(AccessLevel.PACKAGE)
     private T repositoryInstance;
-
-    // -----------------------------------------------------------------------------------------------------------------
-    @Autowired
-    @Accessors(fluent = true)
-    @Getter(AccessLevel.PACKAGE)
-    private JsonMapper jsonMapper;
 }

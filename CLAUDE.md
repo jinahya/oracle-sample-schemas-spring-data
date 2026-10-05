@@ -20,9 +20,15 @@ Upstream's entities all live in `com.github.jinahya.oracle.sample.schemas.persis
 `hr`/`sh` here follow it with `.data`. `co` here has **not** been moved yet and is still
 `…schemas.co.data`; do not extrapolate one module's package to another.
 
-Every module has one repository per upstream `@Entity` (`<Entity>Repository`), except the `*WithIdClass`
-flavours, which the test context leaves out of the persistence unit. Only `co`'s `CustomerRepository` declares
-methods; the rest are empty, as are their tests.
+Every module has one repository per upstream `@Entity` (`<Entity>Repository`), except
+`co`'s `OrderItemWithIdClass`, which the test context leaves out of the persistence unit (see below). Only
+some of `co`'s repositories declare methods (`CustomerRepository`, `InventoryRepository`,
+`OrderRepository`, `ProductRepository`); the rest are empty, as are their tests.
+
+`co` also has a repository fragment for each upstream view class that is not an `@Entity`:
+`ProductReviewRepository` (`PRODUCT_REVIEWS`), mixed into `ProductRepository`, and `StoreOrderRepository`
+(`STORE_ORDERS`), mixed into `StoreRepository` (see "View repositories" below). Neither has methods yet. `hr` and `sh`
+have none: upstream maps all of their views as entities.
 
 ## Upstream
 
@@ -44,13 +50,12 @@ written *here*:
 - **Name attributes through the generated static metamodel** (`Customer_`, `Employee_`, …), e.g.
   `root.get(Customer_.emailAddress)`, never a string. Where a compile-time constant is needed
   (annotation values), use the entity's own `ATTRIBUTE_NAME_*` constant.
-- **Some tables are mapped twice**, one class per id strategy (`*WithEmbeddedId` / `*WithIdClass`):
-  `co`'s `ORDER_ITEMS` and `PRODUCT_ORDERS`; `hr`'s `JOB_HISTORY`; `sh`'s `COSTS`, `SALES`,
-  `PROFITS`, `FWEEK_PSCAT_SALES_MV`. Only in **`hr`** do the two share an entity name
-  (`@Entity(name = "JobHistory")`), so scanning both fails there as a duplicate. In `co` and `sh`
-  each class has its own entity name and both load. Every module's test context declares a
-  `ManagedClassNameFilter` that drops `*WithIdClass`: required in `hr`, and it keeps one flavour per
-  table in the other two.
+- **Each table is mapped once**, with either an `@EmbeddedId` or an `@IdClass` (`co`'s
+  `ProductOrder`, `hr`'s `JobHistory`, `sh`'s `Cost`, `Sale`, `Profit`, `FweekPscatSalesMv`), and
+  its repository is named after the entity. The one exception is `co`'s `ORDER_ITEMS`, still mapped
+  as both `OrderItemWithEmbeddedId` and `OrderItemWithIdClass`, each under its own entity name. `co`'s
+  test context declares a `ManagedClassNameFilter` that drops `*WithIdClass`; `hr` and `sh` need
+  none.
 - **Named queries** are declared on the entities as `<EntityName>.<queryName>`, e.g.
   `Customer.selectOneByEmailAddress`. A repository method of exactly that name runs the query with no
   annotation. Its named parameters must be bound with `@Param`: this build does not compile with
@@ -102,13 +107,17 @@ Each is commented in `pom.xml`:
   (`spring-boot-starter-data-jpa-test`, `spring-boot-starter-jackson-test`), not
   `spring-boot-starter-test`, which each of them brings. Slice annotations moved with them:
   `@DataJpaTest` is `org.springframework.boot.data.jpa.test.autoconfigure.DataJpaTest`.
-- **`spring-boot-starter-data-jpa` is `provided`**, so consumers of these jars must bring Spring Data
-  JPA themselves.
+- **Main depends on `spring-data-jpa` alone, `provided`** (besides Lombok, compile time only), not on a Boot starter, so consumers of
+  these jars must bring Spring Data JPA and a JPA provider themselves. `jakarta.persistence-api` is
+  declared, `provided`, because main code uses JPA types (`_NonEntityRepositoryImpl`'s `EntityManager`);
+  `spring-data-jpa` does not bring it. Tests get `spring-boot-starter-data-jpa` through
+  `spring-boot-starter-data-jpa-test`; do not declare it.
 - **Shared dependencies live in the root pom.** A module pom names only its entity artifact, its
   `test-companion` jar and the Oracle driver (`ojdbc17`, test scope), with no versions.
 - **Dependency convergence is a build defect**, not a warning, as upstream treats it. Resolve
   `jakarta.*` at the platform level instead of pinning individual API artifacts.
-- **Lombok is for test sources only**, on the `default-testCompile` processor path.
+- **Lombok is for main and test sources**, `provided` (neither packaged nor passed on to consumers), and on
+  the compiler's processor path for both `default-compile` and `default-testCompile`.
 
 ## Code conventions
 
@@ -117,13 +126,36 @@ Each is commented in `pom.xml`:
   `IllegalArgumentException` before any query runs. Return `Optional` for lookups that may find
   nothing.
 - Repositories extend `JpaRepository<E, ID>` and `JpaSpecificationExecutor<E>`; criteria queries go
-  through `Specification` and the metamodel.
+  through `Specification` and the metamodel. `ProductRepository` and `StoreRepository` also extend a view
+  fragment (below).
+
+## View repositories
+
+Spring Data JPA builds repositories for managed types only: a repository of a non-`@Entity` class, even a bare
+`Repository<ProductReview, …>`, fails at startup with `Not a managed type`. So a view upstream maps without `@Entity`
+gets a Spring Data **custom repository fragment**:
+
+- `<Class>Repository`, a plain interface extending nothing, holds the view's methods.
+- `<Class>RepositoryImpl`, package-private, implements it over a `JdbcClient` (constructor by Lombok's
+  `@RequiredArgsConstructor`). Spring Data finds it **by that name** (the fragment's plus `Impl`) in the repository
+  packages and registers it itself: no `@Repository`, component scan or `@Import`. Renaming it breaks the lookup.
+- The repository of the entity the view is built from extends the fragment: `ProductRepository` for
+  `ProductReviewRepository`, `StoreRepository` for `StoreOrderRepository`. Callers reach the view through it.
+
+- **No CRUD.** The views have no usable key and every column is read-only: no `findById`, `save` or `delete`.
+- **Qualify the view with its schema** (`CO.PRODUCT_REVIEWS`). `hibernate.default_schema` reaches only SQL Hibernate
+  generates, and the tests connect as `dmlonly`, which owns no such view; unqualified, Oracle answers `ORA-00942`.
+- **Inside a transaction**, `JdbcClient` shares JPA's connection but sees only what JPA has flushed.
+- **`JdbcClient` comes with what is already there**: `spring-jdbc` through `spring-data-jpa` → `spring-orm`
+  (`provided`; do not declare it), and the bean from Boot's auto-configuration on the single `DataSource`. A
+  consumer without Boot declares `JdbcClient.create(dataSource)` itself.
+- `JdbcClient` translates `SQLException` to `DataAccessException` itself.
 
 ## Tests
 
 Each module's test root has a `___Spring_TestContext`: `@SpringBootConfiguration` +
 `@EnableAutoConfiguration`, plus `@EntityScan(basePackageClasses = __NoOp.class)` (the entities are
-outside this package, so auto-configuration would not find them) and the `ManagedClassNameFilter`.
+outside this package, so auto-configuration would not find them), and in `co` the `ManagedClassNameFilter`.
 Both `@SpringBootTest` and `@DataJpaTest` find it by searching up the packages; a `@DataJpaTest` uses
 its `@EntityScan` and `@Bean`s but replaces its auto-configuration with the slice's. Anything added
 there reaches every test in the module.
@@ -148,21 +180,3 @@ A `JsonMapper` (Jackson 3, `tools.jackson.databind.json.JsonMapper`) is injectab
 Logging is set in `application.yaml`: `org.hibernate.SQL: debug` and `org.hibernate.orm.jdbc.bind:
 trace` for statements and bind values, and the module's own `.data` package at `debug` so a test's
 `log.debug(...)` prints. No `logback-test.xml` is needed.
-
-## jOOQ (tests only)
-
-`spring-boot-starter-jooq-test` (test scope, Boot's version, the open source edition) gives a `DSLContext` on the
-test datasource. Use it for what JPA cannot map, chiefly the views, which have no primary key.
-
-- **Generated classes live in `src/test/java-jooq`** (a test source root added by `build-helper-maven-plugin`), in
-  `…data.jooq`, and are committed. Regenerate with `./_mvn_jooq-codegen.sh` (the `jooq-codegen` profile), which reads
-  the live Oracle schema through the generic `JDBCDatabase`. jOOQ empties `…data.jooq` on every run: write nothing
-  there by hand. Hand-written jOOQ code goes beside it, in `…data` under `src/test/java-jooq`.
-- **There is no Oracle dialect**: it is commercial only, so jOOQ runs with `SQLDialect.DEFAULT` against Oracle.
-  Plain `select`/`where`/`orderBy`/`fetch` work. `limit`/`offset` do not (`DEFAULT` renders `LIMIT ?`, which Oracle
-  rejects), and an empty `IN` list renders `IN ()`: guard it. An `ORA-` error from jOOQ points at the dialect first.
-- **Generated column types come from `<forcedTypes>`** in the profile: `JDBCDatabase` reports Oracle's type names
-  without precision, so every `NUMBER` is a `BigDecimal` except an `*_ID` column, which is a `Long`.
-- **Mapping into upstream classes** (`fetchInto(ProductReview.class)`) reads their `@Column` names, which needs
-  `jooq-jpa-extensions` and the provider that `_Jooq_TestConfiguration` sets; `@Import` it.
-- jOOQ has no repository abstraction and knows nothing of `Pageable`/`Page`.
