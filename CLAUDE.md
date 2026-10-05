@@ -25,10 +25,9 @@ Every module has one repository per upstream `@Entity` (`<Entity>Repository`), e
 some of `co`'s repositories declare methods (`CustomerRepository`, `InventoryRepository`,
 `OrderRepository`, `ProductRepository`); the rest are empty, as are their tests.
 
-`co` also has a repository fragment for each upstream view class that is not an `@Entity`:
-`ProductReviewRepository` (`PRODUCT_REVIEWS`), mixed into `ProductRepository`, and `StoreOrderRepository`
-(`STORE_ORDERS`), mixed into `StoreRepository` (see "View repositories" below). Neither has methods yet. `hr` and `sh`
-have none: upstream maps all of their views as entities.
+`co` also has a repository for each upstream view class that is not an `@Entity`: `ProductReviewRepository`
+(`PRODUCT_REVIEWS`) and `StoreOrderRepository` (`STORE_ORDERS`). They are not Spring Data repositories (see "View
+repositories" below). `hr` and `sh` have none: upstream maps all of their views as entities.
 
 ## Upstream
 
@@ -58,9 +57,10 @@ written *here*:
   none.
 - **Named queries** are declared on the entities as `<EntityName>.<queryName>`, e.g.
   `Customer.selectOneByEmailAddress`. A repository method of exactly that name runs the query with no
-  annotation. Its named parameters must be bound with `@Param`: this build does not compile with
-  `-parameters`, so without `@Param` the argument is bound positionally and the call fails at run
-  time, even though the context starts.
+  annotation. Its named parameters are bound by name: this build compiles with `-parameters`
+  (`maven.compiler.parameters`, as upstream), which also puts parameter names in method-validation
+  messages. The existing `@Param`s are kept; they still work, and keep binding independent of the
+  compiler flag.
 - Upstream jars carry **entities and metamodel only**; their `persistence.xml` is test-only, so this
   project supplies its own datasource and JPA configuration.
 
@@ -126,21 +126,27 @@ Each is commented in `pom.xml`:
   `IllegalArgumentException` before any query runs. Return `Optional` for lookups that may find
   nothing.
 - Repositories extend `JpaRepository<E, ID>` and `JpaSpecificationExecutor<E>`; criteria queries go
-  through `Specification` and the metamodel. `ProductRepository` and `StoreRepository` also extend a view
-  fragment (below).
+  through `Specification` and the metamodel. The view repositories below are the exception.
 
 ## View repositories
 
 Spring Data JPA builds repositories for managed types only: a repository of a non-`@Entity` class, even a bare
 `Repository<ProductReview, …>`, fails at startup with `Not a managed type`. So a view upstream maps without `@Entity`
-gets a Spring Data **custom repository fragment**:
+gets a plain interface and a plain bean:
 
-- `<Class>Repository`, a plain interface extending nothing, holds the view's methods.
-- `<Class>RepositoryImpl`, package-private, implements it over a `JdbcClient` (constructor by Lombok's
-  `@RequiredArgsConstructor`). Spring Data finds it **by that name** (the fragment's plus `Impl`) in the repository
-  packages and registers it itself: no `@Repository`, component scan or `@Import`. Renaming it breaks the lookup.
-- The repository of the entity the view is built from extends the fragment: `ProductRepository` for
-  `ProductReviewRepository`, `StoreRepository` for `StoreOrderRepository`. Callers reach the view through it.
+- `<Class>Repository`, an interface extending nothing, declares the view's methods. Inject it by this type.
+- `<Class>RepositoryImpl`, public and `@Repository`, implements it over a `JdbcClient` (constructor by Lombok's
+  `@RequiredArgsConstructor`). Its statements are `.sql` resources in the same package, named
+  `<VIEW>_<QUERY>.sql`.
+- **Nothing registers it automatically**: Spring Data does not, and no component scan covers the package. The test
+  context `@Import`s each `Impl`; a consumer component-scans the package or `@Import`s the class.
+- No Spring Data repository extends these interfaces; keep it so. (Spring Data would then take an `<Interface>Impl` for
+  the implementation of a *fragment*, an obscure mechanism this project deliberately does not use.)
+- A statement is written either in place, as a text block passed to `jdbcClient.sql(…)` (`countAllByProductName`,
+  `findAllByProductName`), or in a `.sql` resource read once by `sql(…)` (the rest).
+- `@NativeQuery` cannot be used here: it works on Spring Data repositories only, which need an entity.
+- `@Repository` gives the bean Spring's exception translation: an `IllegalArgumentException` it throws reaches the caller
+  as `InvalidDataAccessApiUsageException`.
 
 - **No CRUD.** The views have no usable key and every column is read-only: no `findById`, `save` or `delete`.
 - **Qualify the view with its schema** (`CO.PRODUCT_REVIEWS`). `hibernate.default_schema` reaches only SQL Hibernate
@@ -149,7 +155,6 @@ gets a Spring Data **custom repository fragment**:
 - **`JdbcClient` comes with what is already there**: `spring-jdbc` through `spring-data-jpa` → `spring-orm`
   (`provided`; do not declare it), and the bean from Boot's auto-configuration on the single `DataSource`. A
   consumer without Boot declares `JdbcClient.create(dataSource)` itself.
-- `JdbcClient` translates `SQLException` to `DataAccessException` itself.
 
 ## Tests
 

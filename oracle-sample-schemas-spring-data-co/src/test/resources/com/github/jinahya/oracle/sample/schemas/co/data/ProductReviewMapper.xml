@@ -1,10 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <!--
-  Statements of ProductReviewMapper, the same as ProductReviewRepositoryImpl's .sql resources.
+  Statements of ProductReviewMapper, the same as ProductReviewRepositoryImpl's; countAllByProductName and
+  findAllByProductName are @Select annotations on the interface instead, and use the productReview result map below.
   The view is qualified with its schema: hibernate.default_schema does not reach MyBatis.
   -->
-<mapper namespace="com.github.jinahya.oracle.sample.schemas.co.sql.ProductReviewMapper">
+<mapper namespace="com.github.jinahya.oracle.sample.schemas.co.data.ProductReviewMapper">
 
   <!-- ProductReview has a protected constructor only, which MyBatis calls reflectively, and setters. -->
   <resultMap id="productReview" type="com.github.jinahya.oracle.sample.schemas.persistence.co.ProductReview">
@@ -14,22 +15,7 @@
     <result column="REVIEW" property="review"/>
   </resultMap>
 
-  <select id="countByProductName" resultType="long">
-    SELECT COUNT(*)
-    FROM CO.PRODUCT_REVIEWS
-    WHERE PRODUCT_NAME = #{productName}
-  </select>
-
-  <!-- The view has no key; the order is fixed so that consecutive pages neither repeat nor skip rows. -->
-  <select id="findAllByProductName" resultMap="productReview">
-    SELECT *
-    FROM CO.PRODUCT_REVIEWS
-    WHERE PRODUCT_NAME = #{productName}
-    ORDER BY RATING, REVIEW
-    OFFSET #{offset} ROWS FETCH NEXT #{limit} ROWS ONLY
-  </select>
-
-  <select id="countDistinctProductNamesOfProductReviews" resultType="long">
+  <select id="countDistinctProductNames" resultType="long">
     SELECT COUNT(DISTINCT PRODUCT_NAME)
     FROM CO.PRODUCT_REVIEWS
   </select>
@@ -43,14 +29,7 @@
     <result column="PRODUCT_NAME" javaType="string"/>
   </resultMap>
 
-  <select id="findDistinctProductNamesOfProductReviewsOrderByAvgRatingAsc" resultMap="productName">
-    SELECT DISTINCT PRODUCT_NAME, AVG_RATING
-    FROM CO.PRODUCT_REVIEWS
-    ORDER BY AVG_RATING ASC NULLS LAST, PRODUCT_NAME
-    OFFSET #{offset} ROWS FETCH NEXT #{limit} ROWS ONLY
-  </select>
-
-  <select id="findDistinctProductNamesOfProductReviewsOrderByAvgRatingDesc" resultMap="productName">
+  <select id="findDistinctProductNamesOrderByAvgRating" resultMap="productName">
     SELECT DISTINCT PRODUCT_NAME, AVG_RATING
     FROM CO.PRODUCT_REVIEWS
     ORDER BY AVG_RATING DESC NULLS LAST, PRODUCT_NAME

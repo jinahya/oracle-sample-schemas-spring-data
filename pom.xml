@@ -61,6 +61,12 @@
     <maven.compiler.testSource>${maven.compiler.source}</maven.compiler.testSource>
     <maven.compiler.testTarget>${maven.compiler.testSource}</maven.compiler.testTarget>
     <maven.compiler.testRelease>${maven.compiler.testSource}</maven.compiler.testRelease>
+    <!--
+      Keep parameter names in the class files, as upstream does: method validation reports them
+      (findAllByProductName.offset, not .arg1), and Spring Data and MyBatis can bind named
+      parameters by them.
+      -->
+    <maven.compiler.parameters>true</maven.compiler.parameters>
 
     <!--
       Boot 4, not 3: it manages jakarta.persistence-api 3.2, which the upstream mappings are written
@@ -214,6 +220,15 @@
       <scope>provided</scope>
     </dependency>
     <!--
+      Bean Validation constraints on repository method parameters (@NotBlank, @Positive, ...). The API
+      only, provided: enforcing them takes a provider and @Validated, which the application brings.
+      -->
+    <dependency>
+      <groupId>jakarta.validation</groupId>
+      <artifactId>jakarta.validation-api</artifactId>
+      <scope>provided</scope>
+    </dependency>
+    <!--
       Main and test sources alike. Provided: Lombok is a compile-time tool only, so it is neither
       packaged nor passed on to consumers of these jars.
       -->
@@ -241,6 +256,15 @@
     <dependency>
       <groupId>org.springframework.boot</groupId>
       <artifactId>spring-boot-starter-jackson-test</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <!--
+      Hibernate Validator, and Boot's method validation, which enforces the repositories' constraints;
+      through spring-boot-starter-validation, which this brings.
+      -->
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-validation-test</artifactId>
       <scope>test</scope>
     </dependency>
     <!--

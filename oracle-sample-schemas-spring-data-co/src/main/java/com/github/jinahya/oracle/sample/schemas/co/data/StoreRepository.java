@@ -15,7 +15,6 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface StoreRepository
         extends JpaRepository<Store, Long>,
-                JpaSpecificationExecutor<Store>,
-                StoreOrderRepository {
+                JpaSpecificationExecutor<Store> {
 
 }

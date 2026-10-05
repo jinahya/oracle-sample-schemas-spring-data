@@ -40,10 +40,10 @@ public interface CustomerRepository
      * method name, so this method's name has to stay in step with the query's. The prefix is the entity name, which is
      * the simple class name here only because {@link Customer} declares a bare {@code @Entity}.
      * <p>
-     * The query binds {@code :emailAddress} by name, and the module is not compiled with {@code -parameters}, so the
-     * {@link Param} is what ties the argument to it. Without it, the argument is bound by position, as {@code ?1}, and
-     * the call fails with an {@code InvalidDataAccessApiUsageException}. The context starts either way, so only a call
-     * shows it.
+     * The query binds {@code :emailAddress} by name. The module compiles with {@code -parameters}, so the parameter's
+     * own name would do; the {@link Param} ties the argument to it regardless of that flag. Without both, the argument
+     * would be bound by position, as {@code ?1}, and the call would fail with an
+     * {@code InvalidDataAccessApiUsageException}, though the context starts either way.
      *
      * @param emailAddress the value of the {@link Customer_#EMAIL_ADDRESS} attribute to match; must not be
      *                     {@code null}.

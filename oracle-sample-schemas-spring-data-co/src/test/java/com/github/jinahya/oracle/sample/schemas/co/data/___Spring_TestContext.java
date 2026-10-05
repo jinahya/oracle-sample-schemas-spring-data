@@ -5,6 +5,7 @@ import org.springframework.boot.SpringBootConfiguration;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.persistence.autoconfigure.EntityScan;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Import;
 import org.springframework.orm.jpa.persistenceunit.ManagedClassNameFilter;
 
 /**
@@ -17,6 +18,11 @@ import org.springframework.orm.jpa.persistenceunit.ManagedClassNameFilter;
 @SpringBootConfiguration
 @EnableAutoConfiguration
 @EntityScan(basePackageClasses = __NoOp.class)
+// The view repositories are plain @Repository beans, which Spring Data does not register and nothing here scans for.
+@Import({
+        ProductReviewRepositoryImpl.class,
+        StoreOrderRepositoryImpl.class
+})
 public class ___Spring_TestContext {
 
     /**

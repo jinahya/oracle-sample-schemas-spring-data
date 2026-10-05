@@ -2,7 +2,6 @@ package com.github.jinahya.oracle.sample.schemas.co.data;
 
 import com.github.jinahya.oracle.sample.schemas.persistence.co.Product;
 import com.github.jinahya.oracle.sample.schemas.persistence.co.ProductDetails;
-import com.github.jinahya.oracle.sample.schemas.persistence.co.ProductReview;
 import com.github.jinahya.oracle.sample.schemas.persistence.co.Product_;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.BeforeAll;
@@ -11,24 +10,18 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
-import org.springframework.dao.InvalidDataAccessApiUsageException;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.JpaSort;
 
 import java.math.BigDecimal;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
-import java.util.function.BiFunction;
-import java.util.function.Function;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.assertj.core.api.Assertions.tuple;
 import static org.assertj.core.api.Assumptions.assumeThat;
 
 /**
@@ -239,244 +232,6 @@ class ProductRepository_SpringBootIT
             for (final var review : value.getReviews()) {
                 log.debug("\treview: {}", review);
             }
-        }
-    }
-
-    // -----------------------------------------------------------------------------------------------------------------
-
-    /**
-     * Selects the name of a random product with reviews, straight from the view, and aborts the calling test if the
-     * view holds none.
-     *
-     * @return the name of a product with reviews.
-     */
-    private String selectRandomReviewedProductName() {
-        final var productName = (String) entityManager()
-                .createNativeQuery("SELECT PRODUCT_NAME FROM CO.PRODUCT_REVIEWS ORDER BY DBMS_RANDOM.VALUE"
-                                   + " FETCH FIRST 1 ROWS ONLY")
-                .getResultList().stream().findFirst().orElse(null);
-        assumeThat(productName).isNotNull();
-        return productName;
-    }
-
-    /**
-     * Tests {@link ProductRepository#countByProductName(String)}, which the
-     * {@link ProductReviewRepository} fragment brings.
-     */
-    @Nested
-    class CountProductReviewsByProductName_Test {
-
-        /**
-         * Asserts that the count of a reviewed product's name is positive, and is what the view holds for it.
-         */
-        @Test
-        void __() {
-            final var productName = selectRandomReviewedProductName();
-            final var expected = ((Number) entityManager()
-                    .createNativeQuery("SELECT COUNT(*) FROM CO.PRODUCT_REVIEWS WHERE PRODUCT_NAME = ?1")
-                    .setParameter(1, productName)
-                    .getSingleResult()).longValue();
-            final var count = repositoryInstance().countByProductName(productName);
-            assertThat(count).isPositive().isEqualTo(expected);
-        }
-
-        /**
-         * Asserts that a name no product has counts zero.
-         */
-        @Test
-        void _Zero_NoSuchProduct() {
-            assertThat(repositoryInstance().countByProductName("no such product, surely")).isZero();
-        }
-    }
-
-    /**
-     * Tests {@link ProductRepository#findAllByProductName(String, long, int)}, which the
-     * {@link ProductReviewRepository} fragment brings.
-     */
-    @Nested
-    class FindAllProductReviewsByProductName_Test {
-
-        /**
-         * Asserts that one page as large as the count holds all the reviews of a reviewed product's name, all of that
-         * name, mapped column by column.
-         */
-        @Test
-        void __All() {
-            final var productName = selectRandomReviewedProductName();
-            final var count = repositoryInstance().countByProductName(productName);
-            final var found = repositoryInstance().findAllByProductName(productName, 0L, (int) count);
-            found.forEach(r -> log.debug("review: {}", r));
-            assertThat(found)
-                    .hasSize((int) count)
-                    .allSatisfy(r -> assertThat(r.getProductName()).isEqualTo(productName))
-                    .anySatisfy(r -> assertThat(r.getReview()).isNotNull());
-        }
-
-        /**
-         * Asserts that pages of two, read one after another, add up to the single page of all, in the same order.
-         */
-        @Test
-        void __Paged() {
-            final var productName = selectRandomReviewedProductName();
-            final var count = repositoryInstance().countByProductName(productName);
-            final var all = repositoryInstance().findAllByProductName(productName, 0L, (int) count);
-            final var limit = 2;
-            final var paged = new ArrayList<ProductReview>();
-            for (long offset = 0L; ; offset += limit) {
-                final var page = repositoryInstance().findAllByProductName(productName, offset, limit);
-                assertThat(page).hasSizeLessThanOrEqualTo(limit);
-                if (page.isEmpty()) {
-                    break;
-                }
-                paged.addAll(page);
-            }
-            assertThat(paged)
-                    .extracting(ProductReview::getRating, ProductReview::getReview)
-                    .containsExactlyElementsOf(
-                            all.stream().map(r -> tuple(r.getRating(), r.getReview()))
-                                    .toList());
-        }
-
-        /**
-         * Asserts that a name no product has finds nothing.
-         */
-        @Test
-        void _Empty_NoSuchProduct() {
-            final var found = repositoryInstance().findAllByProductName(
-                    "no such product, surely", 0L, 10);
-            assertThat(found).isEmpty();
-        }
-
-        /**
-         * Asserts that a negative offset and a non-positive limit are rejected before any query runs.
-         * <p>
-         * The fragment throws an {@link IllegalArgumentException}; the repository's proxy translates it, as it does
-         * every runtime exception of a {@code @Repository}, into an {@link InvalidDataAccessApiUsageException}.
-         */
-        @Test
-        void _InvalidDataAccessApiUsageException_OffsetOrLimit() {
-            assertThatThrownBy(() -> repositoryInstance().findAllByProductName("x", -1L, 10))
-                    .isInstanceOf(InvalidDataAccessApiUsageException.class)
-                    .hasCauseInstanceOf(IllegalArgumentException.class);
-            assertThatThrownBy(() -> repositoryInstance().findAllByProductName("x", 0L, 0))
-                    .isInstanceOf(InvalidDataAccessApiUsageException.class)
-                    .hasCauseInstanceOf(IllegalArgumentException.class);
-        }
-    }
-
-    // -----------------------------------------------------------------------------------------------------------------
-
-    /**
-     * Reads every distinct {@code (PRODUCT_NAME, AVG_RATING)} of the view, straight from it, ordered as the method
-     * under test orders them, as the expected result of the distinct-names methods.
-     *
-     * @param direction {@code ASC} or {@code DESC}.
-     * @return the product names, in order.
-     */
-    @SuppressWarnings({"unchecked"})
-    private List<String> selectDistinctProductNamesOrderByAvgRating(final String direction) {
-        return ((List<Object[]>) entityManager()
-                .createNativeQuery("SELECT DISTINCT PRODUCT_NAME, AVG_RATING FROM CO.PRODUCT_REVIEWS"
-                                   + " ORDER BY AVG_RATING " + direction + " NULLS LAST, PRODUCT_NAME")
-                .getResultList())
-                .stream().map(r -> (String) r[0]).toList();
-    }
-
-    /**
-     * Reads the specified method a page of {@code limit} at a time, until a page comes back empty.
-     *
-     * @param method the method under test.
-     * @param limit  the size of a page.
-     * @return the names of all the pages, in order.
-     */
-    private static List<String> readAllPages(final BiFunction<Long, Integer, List<String>> method,
-                                             final int limit) {
-        final var all = new ArrayList<String>();
-        for (long offset = 0L; ; offset += limit) {
-            final var page = method.apply(offset, limit);
-            assertThat(page).hasSizeLessThanOrEqualTo(limit);
-            if (page.isEmpty()) {
-                return all;
-            }
-            all.addAll(page);
-        }
-    }
-
-    /**
-     * Tests {@link ProductRepository#countDistinctProductNamesOfProductReviews()}.
-     */
-    @Nested
-    class CountDistinctProductNamesOfProductReviews_Test {
-
-        /**
-         * Asserts that the count is what the view holds.
-         */
-        @Test
-        void __() {
-            final var expected = ((Number) entityManager()
-                    .createNativeQuery("SELECT COUNT(DISTINCT PRODUCT_NAME) FROM CO.PRODUCT_REVIEWS")
-                    .getSingleResult()).longValue();
-            assertThat(repositoryInstance().countDistinctProductNamesOfProductReviews()).isEqualTo(expected);
-        }
-    }
-
-    /**
-     * Tests {@link ProductRepository#findDistinctProductNamesOfProductReviewsOrderByAvgRatingAsc(long, int)} and
-     * {@link ProductRepository#findDistinctProductNamesOfProductReviewsOrderByAvgRatingDesc(long, int)}.
-     */
-    @Nested
-    class FindDistinctProductNamesOfProductReviewsOrderByAvgRating_Test {
-
-        /**
-         * Asserts that pages of seven, ascending, add up to every distinct name, once each, in the view's order.
-         */
-        @Test
-        void __Asc() {
-            final var expected = selectDistinctProductNamesOrderByAvgRating("ASC");
-            assumeThat(expected).isNotEmpty();
-            final var names = readAllPages(
-                    repositoryInstance()::findDistinctProductNamesOfProductReviewsOrderByAvgRatingAsc, 7);
-            log.debug("asc: {}", names);
-            assertThat(names)
-                    .doesNotHaveDuplicates()
-                    .hasSize((int) repositoryInstance().countDistinctProductNamesOfProductReviews())
-                    .containsExactlyElementsOf(expected);
-        }
-
-        /**
-         * Asserts the same of pages of seven, descending.
-         */
-        @Test
-        void __Desc() {
-            final var expected = selectDistinctProductNamesOrderByAvgRating("DESC");
-            assumeThat(expected).isNotEmpty();
-            final var names = readAllPages(
-                    repositoryInstance()::findDistinctProductNamesOfProductReviewsOrderByAvgRatingDesc, 7);
-            log.debug("desc: {}", names);
-            assertThat(names)
-                    .doesNotHaveDuplicates()
-                    .hasSize((int) repositoryInstance().countDistinctProductNamesOfProductReviews())
-                    .containsExactlyElementsOf(expected);
-        }
-
-        /**
-         * Asserts that the two directions differ only in the order of the reviewed names: the first name ascending is
-         * the last reviewed one descending.
-         */
-        @Test
-        void __AscFirstIsDescLastReviewed() {
-            final var asc = repositoryInstance().findDistinctProductNamesOfProductReviewsOrderByAvgRatingAsc(0L, 1);
-            assumeThat(asc).isNotEmpty();
-            final var desc = selectDistinctProductNamesOrderByAvgRating("DESC");
-            final var unreviewed = ((Number) entityManager()
-                    .createNativeQuery("SELECT COUNT(DISTINCT PRODUCT_NAME) FROM CO.PRODUCT_REVIEWS"
-                                       + " WHERE AVG_RATING IS NULL")
-                    .getSingleResult()).intValue();
-            final var lastReviewedDesc = desc.get(desc.size() - 1 - unreviewed);
-            final Function<String, Object> avg = n -> entityManager()
-                    .createNativeQuery("SELECT DISTINCT AVG_RATING FROM CO.PRODUCT_REVIEWS WHERE PRODUCT_NAME = ?1")
-                    .setParameter(1, n).getSingleResult();
-            assertThat(avg.apply(asc.getFirst())).isEqualTo(avg.apply(lastReviewedDesc));
         }
     }
 }
