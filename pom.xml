@@ -79,7 +79,7 @@
     <version.oracle-sample-schemas-persistence>0.0.1-SNAPSHOT</version.oracle-sample-schemas-persistence>
 
     <!-- https://central.sonatype.com/artifact/io.github.jinahya/jinahya-persistence-test-utils/versions -->
-    <version.jinahya-persistence>0.6.2-SNAPSHOT</version.jinahya-persistence>
+    <version.jinahya-persistence>0.6.5</version.jinahya-persistence>
 
     <!-- Same property and value as upstream, which compiles its randomizers against it. -->
     <!-- https://central.sonatype.com/artifact/uk.co.jemos.podam/podam/versions -->
