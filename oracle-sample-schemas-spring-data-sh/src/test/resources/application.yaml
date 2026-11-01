@@ -4,12 +4,12 @@
 #
 # Start it from the sibling checkout, which owns the compose file and the install hook:
 #
-#     cd ../oracle-sample-schemas-persistence && ./compose.sh
+#     cd ../../oracle-sample-schemas-persistence && ./compose.sh
 #
 # That serves the freepdb1 PDB on localhost:1521, with CO, HR and SH installed once by the startup hook.
 #
 # These are the same coordinates upstream's own integration-test persistence unit uses
-# (../oracle-sample-schemas-persistence/oracle-sample-schemas-persistence-sh/src/test/resources/META-INF/persistence.xml,
+# (../../oracle-sample-schemas-persistence/oracle-sample-schemas-persistence-sh/src/test/resources/META-INF/persistence.xml,
 # `sh-it`); keep the two in step.
 #
 spring:

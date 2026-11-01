@@ -38,12 +38,12 @@ The other repositories are empty, and so are their tests.
 
 ## Upstream, and the entities
 
-The sibling checkout `../oracle-sample-schemas-persistence` publishes, at `0.0.6-SNAPSHOT`, per schema, a jar of
+The upstream checkout `../../oracle-sample-schemas-persistence` publishes, at `0.0.6-SNAPSHOT`, per schema, a jar of
 **mapped superclasses (`<schema>.mapped.Mapped<Entity>`), their generated static metamodel (`MappedCustomer_`, ...),
 and the embeddables and converters the mappings name**, and a second jar of the same artifact classified
 `test-companion`, holding the `*_Randomizer` and `*_Persister` classes compiled with its tests. Both are **SNAPSHOTs
 that exist only locally**: after a change upstream, run `./mvnw -DskipTests install` there before building here. Read
-`../oracle-sample-schemas-persistence/CLAUDE.md` before touching anything about the mappings.
+`../../oracle-sample-schemas-persistence/CLAUDE.md` before touching anything about the mappings.
 
 - **Upstream keeps its entities in `src/test`**, on purpose: which associations an entity maps, lazy or not, with what
   cascade, is an application's decision, and this project is that application. The entities here are copies of
@@ -94,7 +94,7 @@ mvn -o enforcer:enforce -Denforcer.rules=dependencyConvergence
 Surefire's default includes do not match `*IT`, and no failsafe plugin is configured, so `test`/`verify`/`install`
 never run the `*_SpringBootIT` classes; run them explicitly with `-Dtest`.
 
-**The integration tests need the Oracle container** that upstream owns: run `../oracle-sample-schemas-persistence/compose.sh`.
+**The integration tests need the Oracle container** that upstream owns: run `../../oracle-sample-schemas-persistence/compose.sh`.
 It serves `freepdb1` on `localhost:1521` with CO, HR and SH installed. Each module's `src/test/resources/application.yaml`
 connects as `dmlonly` (DML only, no DDL), sets `hibernate.default_schema` to the schema, and `ddl-auto: none`. Never
 point a test at the schema owner or let it generate DDL against Oracle.

@@ -26,7 +26,7 @@ still empty.
 The upstream jars are `0.0.6-SNAPSHOT`s that exist only locally. Install them first:
 
 ```sh
-(cd ../oracle-sample-schemas-persistence && ./mvnw -DskipTests install)
+(cd ../../oracle-sample-schemas-persistence && ./mvnw -DskipTests install)
 ```
 
 ## Build
@@ -42,7 +42,7 @@ The `*_SpringBootIT` classes run against a real Oracle database and are not run 
 container that upstream provides, which serves `freepdb1` on `localhost:1521` with CO, HR and SH installed:
 
 ```sh
-../oracle-sample-schemas-persistence/compose.sh
+../../oracle-sample-schemas-persistence/compose.sh
 mvn -pl oracle-sample-schemas-spring-data-co -Dtest='*_SpringBootIT' -Dsurefire.failIfNoSpecifiedTests=false test
 ```
 
