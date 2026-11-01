@@ -13,8 +13,6 @@ import com.github.jinahya.oracle.sample.schemas.persistence.sh.Promotion;
 class PromotionRepository_DataJpaTest
         extends _Repository_DataJpaTest<PromotionRepository, Promotion, Integer> {
 
-    // -----------------------------------------------------------------------------------------------------------------
-
     /**
      * Creates a new instance.
      */

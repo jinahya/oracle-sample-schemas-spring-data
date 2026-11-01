@@ -14,8 +14,6 @@ import com.github.jinahya.oracle.sample.schemas.persistence.sh.ProfitId;
 class ProfitRepository_DataJpaTest
         extends _Repository_DataJpaTest<ProfitRepository, Profit, ProfitId> {
 
-    // -----------------------------------------------------------------------------------------------------------------
-
     /**
      * Creates a new instance.
      */

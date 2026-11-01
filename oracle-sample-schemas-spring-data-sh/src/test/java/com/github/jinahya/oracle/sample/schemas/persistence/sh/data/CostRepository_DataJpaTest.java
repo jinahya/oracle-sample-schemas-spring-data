@@ -14,8 +14,6 @@ import com.github.jinahya.oracle.sample.schemas.persistence.sh.CostId;
 class CostRepository_DataJpaTest
         extends _Repository_DataJpaTest<CostRepository, Cost, CostId> {
 
-    // -----------------------------------------------------------------------------------------------------------------
-
     /**
      * Creates a new instance.
      */

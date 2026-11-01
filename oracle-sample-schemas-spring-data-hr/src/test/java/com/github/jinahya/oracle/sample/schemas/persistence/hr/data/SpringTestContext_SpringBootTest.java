@@ -11,9 +11,9 @@ import org.springframework.boot.test.context.SpringBootTest;
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
- * Tests {@link ___Spring_TestContext}, which is all this module has to test until it declares repositories.
+ * Tests {@link ___Spring_TestContext}, in the full context.
  * <p>
- * Booting proves that the {@code @EntityScan} finds the entities one package up in the upstream jar.
+ * Booting proves that the {@code @EntityScan} finds the entities in the parent package of this module.
  * <p>
  * It does <em>not</em> prove that the database is reachable. {@code application.yaml} names the dialect, so Hibernate
  * only logs a failed metadata connection ({@code HHH000342}) and starts anyway. Nothing here runs a query, so this test
@@ -21,6 +21,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  * repository test that queries the schema will cover both.
  *
  * @see ___Spring_TestContext
+ * @see SpringTestContext_DataJpaTest
  */
 @SpringBootTest
 @NoArgsConstructor(access = AccessLevel.PACKAGE)
@@ -35,9 +36,8 @@ class SpringTestContext_SpringBootTest {
         /**
          * Asserts that the persistence unit holds entities, among them the composite-key ones.
          * <p>
-         * Upstream used to map JOB_HISTORY twice, and this module had to keep one flavour of each out of the unit.
-         * Each is now mapped once, as {@code JobHistory}, so the scan takes everything. An empty metamodel would mean the
-         * scan found nothing.
+         * An empty metamodel would mean the scan found nothing; the composite-key entities are named so that a mapping
+         * of any of them breaking the scan is noticed.
          */
         @Test
         void __() {
@@ -45,7 +45,7 @@ class SpringTestContext_SpringBootTest {
             assertThat(managedTypes)
                     .isNotEmpty()
                     .extracting(t -> t.getJavaType().getSimpleName())
-                    .contains("JobHistory");
+                    .contains("Employee", "JobHistory");
         }
     }
 

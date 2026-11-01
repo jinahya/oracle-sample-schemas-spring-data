@@ -7,17 +7,18 @@ import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.annotation.Bean;
 
 /**
- * What a {@code @DataJpaTest} needs on top of {@code application.yaml} to run against the embedded H2 that
- * {@code @AutoConfigureTestDatabase} swaps in for the Oracle datasource.
+ * What a {@code @DataJpaTest} needs on top of {@code application.yaml} to run against the embedded H2 of the
+ * {@code h2} profile ({@code application-h2.yaml}), which stands in for the Oracle datasource.
  * <p>
- * That annotation replaces the {@code DataSource} only. The JPA settings of {@code application.yaml} still apply, and
- * they are written for the installed {@code SH} schema, so on H2 they mean an empty database with no {@code SH} schema
- * in it ({@code Schema "SH" not found}). This undoes exactly those, and turns off the {@code showSql} that
- * {@code @DataJpaTest} switches on by default.
+ * That profile replaces the {@code DataSource} only. The JPA settings of {@code application.yaml} still apply, and
+ * they are written for the installed {@code SH} schema, so on H2 they mean an empty database with no
+ * {@code SH} schema in it ({@code Schema "SH" not found}). This undoes exactly those, and turns off the
+ * {@code showSql} that {@code @DataJpaTest} switches on by default.
  * <p>
- * {@link _Repository_DataJpaTest} imports it, so a test extending that class has it already. A slice test that does not
- * extend it pulls it in with {@code @Import(_Repository_DataJpaTest_Configuration.class)}. A slice test that wants the
- * installed schema instead leaves this out and adds {@code @AutoConfigureTestDatabase(replace = Replace.NONE)}.
+ * {@link _Repository_DataJpaTest} imports it, so a test extending that class has it already. A slice test that does
+ * not extend it pulls it in with {@code @Import(_Repository_DataJpaTest_Configuration.class)}, and activates the
+ * profile with {@code @ActiveProfiles("h2")}. A slice test that wants the installed schema instead leaves both out and
+ * adds {@code @AutoConfigureTestDatabase(replace = Replace.NONE)}.
  */
 @TestConfiguration(proxyBeanMethods = false)
 class _Repository_DataJpaTest_Configuration {
@@ -43,7 +44,7 @@ class _Repository_DataJpaTest_Configuration {
             // application.yaml names OracleDialect rather than letting Hibernate detect it; name the right one here.
             properties.put(AvailableSettings.DIALECT, H2Dialect.class.getName());
             // @DataJpaTest defaults showSql to true, which would print every statement to stdout again next to the
-            // org.hibernate.SQL logger of application.yaml. Boot hands that flag to the vendor adapter, whose
+            // org.hibernate.SQL logger of logback-spring.xml. Boot hands that flag to the vendor adapter, whose
             // properties only fill keys this map leaves unset, so naming the key here wins.
             properties.put(AvailableSettings.SHOW_SQL, "false");
         };

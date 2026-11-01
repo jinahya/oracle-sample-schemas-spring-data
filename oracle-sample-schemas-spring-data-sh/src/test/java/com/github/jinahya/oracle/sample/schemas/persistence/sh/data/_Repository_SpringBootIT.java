@@ -1,13 +1,11 @@
 package com.github.jinahya.oracle.sample.schemas.persistence.sh.data;
 
 import com.github.jinahya.persistence.test.util.JinahyaPersistenceTestUtils;
-import com.github.jinahya.persistence.util.JinahyaEntityManagerFactoryUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Optional;
@@ -27,7 +25,7 @@ import static org.assertj.core.api.Assumptions.assumeThat;
  * The tests declared here run for every subclass, against whatever rows its table holds. A table with none aborts them
  * rather than failing them; see {@link #selectRandomPresent()}.
  * <p>
- * Needs the database of {@code application.yaml} up and the SH schema installed; see that file.
+ * Needs the database of {@code application.yaml} up, with the SH schema installed; see that file.
  *
  * @param <T> the type of the repository under test.
  * @param <U> the type of the entity the repository manages.
@@ -36,7 +34,7 @@ import static org.assertj.core.api.Assumptions.assumeThat;
  */
 @SpringBootTest
 @Slf4j
-abstract class _Repository_SpringBootIT<T extends JpaRepository<U, V>, U, V>
+abstract class _Repository_SpringBootIT<T extends _Repository<U, V>, U, V>
         extends __Repository_TestBase<T, U, V> {
 
     /**
@@ -53,7 +51,7 @@ abstract class _Repository_SpringBootIT<T extends JpaRepository<U, V>, U, V>
     // -----------------------------------------------------------------------------------------------------------------
 
     /**
-     * Tests {@link JpaRepository#findById(Object)} against a randomly selected row.
+     * Tests {@link _Repository#findById(Object)} against a randomly selected row.
      */
     @DisplayName("findById(ID)")
     @Nested
@@ -68,7 +66,7 @@ abstract class _Repository_SpringBootIT<T extends JpaRepository<U, V>, U, V>
         @Test
         void findById__() {
             final U selected = selectRandomPresent();
-            final V id = JinahyaEntityManagerFactoryUtils.getIdentifier(entityManagerFactory(), selected);
+            final V id = identifier(selected);
             final var found = repositoryInstance().findById(id);
             assertThat(found).hasValueSatisfying(v -> {
                 assertThat(v)
@@ -87,7 +85,7 @@ abstract class _Repository_SpringBootIT<T extends JpaRepository<U, V>, U, V>
         @Test
         void findById__Transactional() {
             final U selected = selectRandomPresent();
-            final V id = JinahyaEntityManagerFactoryUtils.getIdentifier(entityManagerFactory(), selected);
+            final V id = identifier(selected);
             final var found = repositoryInstance().findById(id);
             assertThat(found).hasValueSatisfying(v -> {
                 assertThat(v)

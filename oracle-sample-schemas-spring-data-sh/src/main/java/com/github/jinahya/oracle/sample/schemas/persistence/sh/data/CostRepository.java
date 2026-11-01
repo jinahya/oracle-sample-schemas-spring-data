@@ -3,8 +3,6 @@ package com.github.jinahya.oracle.sample.schemas.persistence.sh.data;
 import com.github.jinahya.oracle.sample.schemas.persistence.sh.Cost;
 import com.github.jinahya.oracle.sample.schemas.persistence.sh.CostId;
 import com.github.jinahya.oracle.sample.schemas.persistence.sh.Cost_;
-import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.stereotype.Repository;
 
 /**
@@ -15,7 +13,6 @@ import org.springframework.stereotype.Repository;
  */
 @Repository
 public interface CostRepository
-        extends JpaRepository<Cost, CostId>,
-                JpaSpecificationExecutor<Cost> {
+        extends _Repository<Cost, CostId> {
 
 }

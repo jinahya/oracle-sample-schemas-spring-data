@@ -4,184 +4,158 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## What this project is
 
-Spring Data repositories on top of the Jakarta Persistence entities of
-[`oracle-sample-schemas-persistence`](https://github.com/jinahya/oracle-sample-schemas-persistence),
-which maps the [Oracle Database Sample Schemas](https://github.com/oracle-samples/db-sample-schemas).
+Spring Data repositories over the Jakarta Persistence mappings of
+[`oracle-sample-schemas-persistence`](https://github.com/jinahya/oracle-sample-schemas-persistence), which maps the
+[Oracle Database Sample Schemas](https://github.com/oracle-samples/db-sample-schemas). Modelled on the sibling
+`postgresql-demodb-spring-data`, with one module per schema, as upstream has.
 
-The root is a parent-less aggregator (`<packaging>pom</packaging>`) over one module per schema:
+The root is a parent-less aggregator (`<packaging>pom</packaging>`) over the three modules, and their parent: it holds
+what they share, and a module's own pom names only its schema's artifacts.
 
-| Module | Wraps | Sources here |
+| Module | Wraps | Entities | Repositories |
+| --- | --- | --- | --- |
+| `oracle-sample-schemas-spring-data-co` | `io.github.jinahya:oracle-sample-schemas-persistence-co` | `…persistence.co` | `…persistence.co.data` |
+| `oracle-sample-schemas-spring-data-hr` | `io.github.jinahya:oracle-sample-schemas-persistence-hr` | `…persistence.hr` | `…persistence.hr.data` |
+| `oracle-sample-schemas-spring-data-sh` | `io.github.jinahya:oracle-sample-schemas-persistence-sh` | `…persistence.sh` | `…persistence.sh.data` |
+
+`…` is `com.github.jinahya.oracle.sample.schemas`. The test packages are the repositories' packages.
+
+- Each `.data` package is `@NullMarked` (JSpecify: Spring Data rejects a `null` argument to a repository method with
+  `IllegalArgumentException` before any query runs; a lookup that may find nothing returns `Optional`).
+- One repository per entity, named `<Entity>Repository`, extending the module's `_Repository<E, ID>` (`JpaRepository`
+  + `JpaSpecificationExecutor`, `@NoRepositoryBean`). Each module has its own `_Repository`; there is no shared module.
+- The published jars carry **the entities and the repositories**: `spring-data-jpa`, `jakarta.persistence-api` and
+  `jakarta.validation-api` are `provided`, so a consumer brings Spring Data JPA, a JPA provider, and (to enforce the
+  constraints on repository parameters) a validation provider plus `@Validated`. No Boot starter is named in main.
+
+| Module | Entities | Repositories with methods |
 | --- | --- | --- |
-| `oracle-sample-schemas-spring-data-co` | `io.github.jinahya:oracle-sample-schemas-persistence-co` | `com.github.jinahya.oracle.sample.schemas.co.data` |
-| `oracle-sample-schemas-spring-data-hr` | `io.github.jinahya:oracle-sample-schemas-persistence-hr` | `com.github.jinahya.oracle.sample.schemas.persistence.hr.data` |
-| `oracle-sample-schemas-spring-data-sh` | `io.github.jinahya:oracle-sample-schemas-persistence-sh` | `com.github.jinahya.oracle.sample.schemas.persistence.sh.data` |
+| `co` (9) | `Customer`, `CustomerOrderProduct`, `Inventory`, `Order`, `OrderItem` (`OrderItemId`), `Product`, `ProductOrder` (`ProductOrderId`), `Shipment`, `Store` | `CustomerRepository`, `InventoryRepository`, `OrderRepository`, `ProductRepository` |
+| `hr` (8) | `Country`, `Department`, `EmpDetailsView`, `Employee`, `Job`, `JobHistory` (`JobHistoryId`), `Location`, `Region` | none |
+| `sh` (12) | `CalMonthSalesMv`, `Channel`, `Cost` (`CostId`), `Country`, `Customer`, `FweekPscatSalesMv` (`FweekPscatSalesMvId`), `Product`, `Profit` (`ProfitId`), `Promotion`, `Sales` (`SalesId`), `SupplementaryDemographics`, `Time` | none |
 
-Upstream's entities all live in `com.github.jinahya.oracle.sample.schemas.persistence.<schema>`, and
-`hr`/`sh` here follow it with `.data`. `co` here has **not** been moved yet and is still
-`…schemas.co.data`; do not extrapolate one module's package to another.
+The other repositories are empty, and so are their tests.
 
-Every module has one repository per upstream `@Entity` (`<Entity>Repository`), except
-`co`'s `OrderItemWithIdClass`, which the test context leaves out of the persistence unit (see below). Only
-some of `co`'s repositories declare methods (`CustomerRepository`, `InventoryRepository`,
-`OrderRepository`, `ProductRepository`); the rest are empty, as are their tests.
+## Upstream, and the entities
 
-`co` also has a repository for each upstream view class that is not an `@Entity`: `ProductReviewRepository`
-(`PRODUCT_REVIEWS`) and `StoreOrderRepository` (`STORE_ORDERS`). They are not Spring Data repositories (see "View
-repositories" below). `hr` and `sh` have none: upstream maps all of their views as entities.
+The sibling checkout `../oracle-sample-schemas-persistence` publishes, at `0.0.6-SNAPSHOT`, per schema, a jar of
+**mapped superclasses (`<schema>.mapped.Mapped<Entity>`), their generated static metamodel (`MappedCustomer_`, ...),
+and the embeddables and converters the mappings name**, and a second jar of the same artifact classified
+`test-companion`, holding the `*_Randomizer` and `*_Persister` classes compiled with its tests. Both are **SNAPSHOTs
+that exist only locally**: after a change upstream, run `./mvnw -DskipTests install` there before building here. Read
+`../oracle-sample-schemas-persistence/CLAUDE.md` before touching anything about the mappings.
 
-## Upstream
-
-The sibling checkout `../oracle-sample-schemas-persistence` publishes, at `0.0.1-SNAPSHOT`, one entity
-jar per schema plus a second jar of the same artifact classified `test-companion` (randomizers and
-persisters for tests). Each entity package also has a `__NoOp` marker class, which is what
-`@EntityScan(basePackageClasses = …)` points at here.
-
-These are **SNAPSHOTs that exist only locally**. After a change upstream, run
-`./mvnw -DskipTests install` there before building here. Old `com.github.jinahya:{co,hr,sh}` jars may
-still sit in `~/.m2`; nothing uses them.
-
-Read `../oracle-sample-schemas-persistence/CLAUDE.md` before touching mappings. What constrains code
-written *here*:
-
-- **Entities are standalone by design**: no `@MappedSuperclass` hierarchy, no builder layer, each
-  class carries its own column constants. Do not introduce a shared superclass. (`co` carries a
-  `…co.mapped.MappedCustomer` against that rule; ask before following it.)
-- **Name attributes through the generated static metamodel** (`Customer_`, `Employee_`, …), e.g.
-  `root.get(Customer_.emailAddress)`, never a string. Where a compile-time constant is needed
-  (annotation values), use the entity's own `ATTRIBUTE_NAME_*` constant.
-- **Each table is mapped once**, with either an `@EmbeddedId` or an `@IdClass` (`co`'s
-  `ProductOrder`, `hr`'s `JobHistory`, `sh`'s `Cost`, `Sale`, `Profit`, `FweekPscatSalesMv`), and
-  its repository is named after the entity. The one exception is `co`'s `ORDER_ITEMS`, still mapped
-  as both `OrderItemWithEmbeddedId` and `OrderItemWithIdClass`, each under its own entity name. `co`'s
-  test context declares a `ManagedClassNameFilter` that drops `*WithIdClass`; `hr` and `sh` need
-  none.
-- **Named queries** are declared on the entities as `<EntityName>.<queryName>`, e.g.
-  `Customer.selectOneByEmailAddress`. A repository method of exactly that name runs the query with no
-  annotation. Its named parameters are bound by name: this build compiles with `-parameters`
-  (`maven.compiler.parameters`, as upstream), which also puts parameter names in method-validation
-  messages. The existing `@Param`s are kept; they still work, and keep binding independent of the
-  compiler flag.
-- Upstream jars carry **entities and metamodel only**; their `persistence.xml` is test-only, so this
-  project supplies its own datasource and JPA configuration.
+- **Upstream keeps its entities in `src/test`**, on purpose: which associations an entity maps, lazy or not, with what
+  cascade, is an application's decision, and this project is that application. The entities here are copies of
+  upstream's test entities and id classes, verbatim
+  (`oracle-sample-schemas-persistence-<schema>/src/test/java/com/github/jinahya/oracle/sample/schemas/persistence/<schema>/<Entity>.java`
+  there), in the same package, so that the `test-companion` randomizers and persisters, compiled against that
+  package, find them. **Keep them in step with upstream**: diff against upstream's before touching a mapping, and
+  change the mapping there first.
+- **Do not copy upstream's randomizers or persisters into `src/test`.** The `test-companion` jar is on the test
+  classpath, and `ObjectRandomizerUtils` / `EntityPersisterUtils` find `<Entity>_Randomizer` / `<Entity>_Persister`
+  next to the entity by name. A copy only shadows the jar and drifts.
+- **The one exception is `co`'s `ProductDetails_TestUtils`**, copied verbatim into `co`'s test sources
+  (`…persistence.co`). `Product_Randomizer` calls it, but the jar's includes take `*_Randomizer` and `*_Persister`
+  only, so without the copy every `Product` randomization fails with `NoClassDefFoundError`. Drop the copy once
+  upstream packages the helper. The same randomizer writes `PRODUCT_DETAILS` with Jackson 2's `ObjectMapper`, which
+  upstream has at test scope, so `co` declares `jackson-databind` (test, from the root's `jackson-bom` import).
+- **Not copied: the non-entity view classes.** Upstream maps `co`'s keyless views `PRODUCT_REVIEWS` and `STORE_ORDERS`
+  as plain classes (`ProductReview`, `StoreOrder`), not entities. Spring Data JPA builds repositories for managed types
+  only, and the classes are neither entities nor id classes, so there is no repository for either view.
+- **Name attributes through the static metamodel** (`root.get(Customer_.emailAddress)`, generated here by
+  `hibernate-processor` for the entities, extending upstream's `MappedCustomer_`), never a string. Where a compile-time
+  constant is needed, use the mapped superclass's own `ATTRIBUTE_NAME_*` constant, or the metamodel's `EMAIL_ADDRESS`.
+- **Named queries** are declared on the entities as `<EntityName>.<queryName>` (`Customer.selectOneByEmailAddress`).
+  A repository method of exactly that name runs the query with no annotation; its named parameters are bound by name
+  (`maven.compiler.parameters`), and the existing `@Param`s are kept.
+- **Each composite key is mapped once**: `co`'s `OrderItem` and `ProductOrder`, and `sh`'s `Sales` and
+  `FweekPscatSalesMv` with an `@EmbeddedId`; `hr`'s `JobHistory` and `sh`'s `Cost` and `Profit` with an `@IdClass`.
+  Hibernate logs `HHH90005707` ("Unable to locate static metamodel field") for the `@IdClass` attributes, which the
+  mapped superclass declares and the entity's metamodel does not repeat; it is a warning, and the mappings work.
+- Identifiers of `co`'s tables are `IDENTITY` columns, which the randomizers leave `null`.
 
 ## Build
 
-There is no wrapper here; use the Maven on `PATH` (3.9.x).
+There is no wrapper here; use the Maven on `PATH`. The build JDK must be **25** (enforced): main sources compile at
+release 17, as upstream, tests at 25.
 
 ```sh
-mvn clean install                       # whole reactor; unit tests only
+mvn clean verify                                 # whole reactor; unit tests only (@DataJpaTest slices on H2)
 M=oracle-sample-schemas-spring-data-co
-mvn -pl $M -am test                     # one module
+mvn -pl $M test                                  # one module
 mvn -pl $M -Dtest=CustomerRepository_DataJpaTest test
 mvn -pl $M -Dtest=SomeTest#method test
-mvn -pl $M -Dtest='*_SpringBootIT' test # integration tests; needs Oracle, see below
-mvn -o -pl $M dependency:tree
+mvn -pl $M -Dtest='*_SpringBootIT' -Dsurefire.failIfNoSpecifiedTests=false test   # integration tests; needs Oracle
+mvn -o dependency:tree
 mvn -o enforcer:enforce -Denforcer.rules=dependencyConvergence
 ```
 
-Surefire's default includes do not match `*IT`, so `install`/`test` never run the `*_SpringBootIT`
-classes; run them explicitly with `-Dtest`.
+Surefire's default includes do not match `*IT`, and no failsafe plugin is configured, so `test`/`verify`/`install`
+never run the `*_SpringBootIT` classes; run them explicitly with `-Dtest`.
 
-**The integration tests need the Oracle container** that upstream owns: run
-`../oracle-sample-schemas-persistence/_docker-compose-up.sh`. It serves `freepdb1` on `localhost:1521`
-with CO/HR/SH installed. Each module's `src/test/resources/application.yaml` connects as `dmlonly`
-(DML only, no DDL), sets `hibernate.default_schema` to the schema, and `ddl-auto: none`. Never point
-a test at the schema owner or let it generate DDL against Oracle.
-
-The compiler release is **25** (main and test); 21 is the floor set by the upstream entities. Boot
-4.1.1 manages **Hibernate 7.4.5**, while upstream builds against 7.4.9: if a mapping behaves
-differently here, check that first.
+**The integration tests need the Oracle container** that upstream owns: run `../oracle-sample-schemas-persistence/compose.sh`.
+It serves `freepdb1` on `localhost:1521` with CO, HR and SH installed. Each module's `src/test/resources/application.yaml`
+connects as `dmlonly` (DML only, no DDL), sets `hibernate.default_schema` to the schema, and `ddl-auto: none`. Never
+point a test at the schema owner or let it generate DDL against Oracle.
 
 ## Load-bearing pom decisions
 
 Each is commented in `pom.xml`:
 
-- **Spring Boot 4.x (`4.1.1`), not 3.x.** Boot 4 manages `jakarta.persistence-api` 3.2.0, which the
-  upstream mappings are written against; Boot 3.x manages 3.1. Do not downgrade to dodge a problem.
-- **`spring-boot-dependencies` is imported, not inherited.** Every Spring / Boot / Hibernate version
-  comes from that BOM; declare those dependencies with `groupId`/`artifactId`/scope only, never a
-  `<version>`. The one exception is the **Lombok pin** (1.18.48, over the BOM's 1.18.46, which
-  breaks on newer JDKs).
-- **Boot 4 starters come in pairs**: `spring-boot-starter-<technology>` and
-  `spring-boot-starter-<technology>-test`. Declare the test starters of the technologies under test
-  (`spring-boot-starter-data-jpa-test`, `spring-boot-starter-jackson-test`), not
-  `spring-boot-starter-test`, which each of them brings. Slice annotations moved with them:
-  `@DataJpaTest` is `org.springframework.boot.data.jpa.test.autoconfigure.DataJpaTest`.
-- **Main depends on `spring-data-jpa` alone, `provided`** (besides Lombok, compile time only), not on a Boot starter, so consumers of
-  these jars must bring Spring Data JPA and a JPA provider themselves. `jakarta.persistence-api` is
-  declared, `provided`, because main code uses JPA types (`_NonEntityRepositoryImpl`'s `EntityManager`);
-  `spring-data-jpa` does not bring it. Tests get `spring-boot-starter-data-jpa` through
-  `spring-boot-starter-data-jpa-test`; do not declare it.
-- **Shared dependencies live in the root pom.** A module pom names only its entity artifact, its
-  `test-companion` jar and the Oracle driver (`ojdbc17`, test scope), with no versions.
-- **Dependency convergence is a build defect**, not a warning, as upstream treats it. Resolve
-  `jakarta.*` at the platform level instead of pinning individual API artifacts.
-- **Lombok is for main and test sources**, `provided` (neither packaged nor passed on to consumers), and on
-  the compiler's processor path for both `default-compile` and `default-testCompile`.
-
-## Code conventions
-
-- `oracle-sample-schemas-spring-data-co`'s main package is `@NullMarked` (JSpecify, which Spring
-  Framework 7 brings). Spring Data enforces it: a `null` argument to a repository method throws
-  `IllegalArgumentException` before any query runs. Return `Optional` for lookups that may find
-  nothing.
-- Repositories extend `JpaRepository<E, ID>` and `JpaSpecificationExecutor<E>`; criteria queries go
-  through `Specification` and the metamodel. The view repositories below are the exception.
-
-## View repositories
-
-Spring Data JPA builds repositories for managed types only: a repository of a non-`@Entity` class, even a bare
-`Repository<ProductReview, …>`, fails at startup with `Not a managed type`. So a view upstream maps without `@Entity`
-gets a plain interface and a plain bean:
-
-- `<Class>Repository`, an interface extending nothing, declares the view's methods. Inject it by this type.
-- `<Class>RepositoryImpl`, public and `@Repository`, implements it over a `JdbcClient` (constructor by Lombok's
-  `@RequiredArgsConstructor`). Its statements are `.sql` resources in the same package, named
-  `<VIEW>_<QUERY>.sql`.
-- **Nothing registers it automatically**: Spring Data does not, and no component scan covers the package. The test
-  context `@Import`s each `Impl`; a consumer component-scans the package or `@Import`s the class.
-- No Spring Data repository extends these interfaces; keep it so. (Spring Data would then take an `<Interface>Impl` for
-  the implementation of a *fragment*, an obscure mechanism this project deliberately does not use.)
-- A statement is written either in place, as a text block passed to `jdbcClient.sql(…)` (`countAllByProductName`,
-  `findAllByProductName`), or in a `.sql` resource read once by `sql(…)` (the rest).
-- `@NativeQuery` cannot be used here: it works on Spring Data repositories only, which need an entity.
-- `@Repository` gives the bean Spring's exception translation: an `IllegalArgumentException` it throws reaches the caller
-  as `InvalidDataAccessApiUsageException`.
-
-- **No CRUD.** The views have no usable key and every column is read-only: no `findById`, `save` or `delete`.
-- **Qualify the view with its schema** (`CO.PRODUCT_REVIEWS`). `hibernate.default_schema` reaches only SQL Hibernate
-  generates, and the tests connect as `dmlonly`, which owns no such view; unqualified, Oracle answers `ORA-00942`.
-- **Inside a transaction**, `JdbcClient` shares JPA's connection but sees only what JPA has flushed.
-- **`JdbcClient` comes with what is already there**: `spring-jdbc` through `spring-data-jpa` → `spring-orm`
-  (`provided`; do not declare it), and the bean from Boot's auto-configuration on the single `DataSource`. A
-  consumer without Boot declares `JdbcClient.create(dataSource)` itself.
+- **Spring Boot 4.x (`4.1.2`), not 3.x.** Boot 4 manages `jakarta.persistence-api` 3.2, which the upstream mappings are
+  written against. Do not downgrade to dodge a problem.
+- **`spring-boot-dependencies` is imported, not inherited** (the root is parent-less). Every Spring / Boot / Hibernate
+  version comes from the BOM; declare those with no `<version>`. Direct `dependencyManagement` entries beat the BOM,
+  which is how the pins work: Lombok `1.18.48` (the BOM's breaks on newer JDKs), and `ojdbc17` and `h2` at upstream's
+  versions. The JUnit, Mockito and Jackson 2 BOMs are imported before Boot's, so they win.
+- **`hibernate-processor` is on the processor path** of both compile executions, from the BOM's version, to generate
+  the entities' static metamodel.
+- **Boot 4 starters come in pairs.** Tests declare `spring-boot-starter-data-jpa-test` and `-validation-test`, not
+  `spring-boot-starter-test`, which each of them brings. `@DataJpaTest` is
+  `org.springframework.boot.data.jpa.test.autoconfigure.DataJpaTest`.
+- **Shared dependencies live in the root pom.** A module pom names only its upstream artifact and its `test-companion`
+  jar (and, for `co`, `jackson-databind`), with no versions. The Oracle driver and H2 are test scope, in the root.
+- **Dependency convergence is a build defect**, not a warning; `enforce-dependency-convergence` runs on every module.
+  Resolve `jakarta.*` at the platform level instead of pinning individual API artifacts.
+- **Lombok is `provided`** for main and test, on the processor path of both compile executions.
 
 ## Tests
 
-Each module's test root has a `___Spring_TestContext`: `@SpringBootConfiguration` +
-`@EnableAutoConfiguration`, plus `@EntityScan(basePackageClasses = __NoOp.class)` (the entities are
-outside this package, so auto-configuration would not find them), and in `co` the `ManagedClassNameFilter`.
-Both `@SpringBootTest` and `@DataJpaTest` find it by searching up the packages; a `@DataJpaTest` uses
-its `@EntityScan` and `@Bean`s but replaces its auto-configuration with the slice's. Anything added
-there reaches every test in the module.
+Each module's test root, `…persistence.<schema>.data`, has `___Spring_TestContext`: `@SpringBootConfiguration` +
+`@EnableAutoConfiguration` + `@EntityScan(basePackageClasses = <an entity>.class)` (the entities are in the parent
+package; the scan covers its subpackages, upstream's `.mapped` among them). It lives in test sources on purpose:
+nothing in `src/main` carries a `@SpringBootApplication`. `SpringTestContext_SpringBootTest` and
+`SpringTestContext_DataJpaTest` test the context itself; the latter generates every entity's table into H2 and counts
+each, so **every entity of every module runs on H2**, and no `_DataJpaTest` is left out.
 
-`oracle-sample-schemas-spring-data-co`'s test classes extend a small hierarchy:
+Repository tests extend a small hierarchy, one copy per module, kept in step by hand:
 
-- `__Repository_TestBase<T, U, V>`: repository, entity and id types; injects the repository and the
-  `EntityManager`.
-- `_Repository_DataJpaTest`: `@DataJpaTest` over an embedded H2, rolled back per test. It imports
-  `_Repository_DataJpaTest_Configuration`, which undoes the Oracle settings of `application.yaml`
-  for H2 (`create-drop`, blank `default_schema`, `H2Dialect`, `show_sql` off).
-- `_Repository_SpringBootIT`: `@SpringBootTest` against the installed schema. Repository calls commit
-  unless the test is `@Transactional`. An empty table aborts a test through an assumption rather than
-  failing it.
+- `__Repository_TestBase<T, U, V>`: repository, entity and id types; injects the repository (`repositoryInstance()`)
+  and the `EntityManager` (`entityManager()`); `identifier(entity)` reads an id through the metamodel; `column(..)`,
+  `longColumn(..)`, `intColumn(..)` read a tuple's columns by alias.
+- `_Repository_DataJpaTest`: `@DataJpaTest` over an embedded H2 (profile `h2`, `application-h2.yaml`, `replace: none`,
+  `MODE=LEGACY;DATABASE_TO_UPPER=FALSE` as upstream's `<schema>-test` unit), rolled back per test. It imports
+  `_Repository_DataJpaTest_Configuration`, which undoes the Oracle settings of `application.yaml` for H2
+  (`create-drop`, blank `default_schema`, `H2Dialect`, `show_sql` off), and `_Repository_DataJpaTest_Fixtures`, which
+  saves randomized entities through their repositories (`fixtures().customer()`, `fixtures().inventory(store,
+  product)`, ...). Only `co`'s fixtures have methods so far.
+- `_Repository_SpringBootIT`: `@SpringBootTest` against the installed schema. Repository calls commit unless the test
+  is `@Transactional`. It declares `FindById_Test` for every subclass, and `selectRandom()` /
+  `selectRandomPresent()`, which aborts the test by an assumption when the table is empty.
 
-Naming: `<Repository>_DataJpaTest` and `<Repository>_SpringBootIT`, with one `@Nested` class per
-method under test (`FindById_Test`, …).
+**The injected `EntityManager` is kept, but a `_DataJpaTest` does not use it.** Everything a slice test does with the
+database goes through the repository under test or the fixtures. Some of `co`'s `_SpringBootIT`s, carried over from
+before, still select a random row of another entity through `entityManager()`.
 
-A `JsonMapper` (Jackson 3, `tools.jackson.databind.json.JsonMapper`) is injectable in a
-`@SpringBootTest` only; the `@DataJpaTest` slice does not configure Jackson.
+Naming: `<Repository>_DataJpaTest` and `<Repository>_SpringBootIT`, with one `@Nested` class per method under test
+(`FindById_Test`, `FindAllByStore_Test`, ...), and test methods named `_Empty_Unknown`, `_NotEmpty_Known`,
+`__Transactional` and the like.
 
-Logging is set in `application.yaml`: `org.hibernate.SQL: debug` and `org.hibernate.orm.jdbc.bind:
-trace` for statements and bind values, and the module's own `.data` package at `debug` so a test's
-`log.debug(...)` prints. No `logback-test.xml` is needed.
+An integration test **reads the sample data; it never fabricates rows**. A test that must write does so inside
+`@Transactional`, so it is rolled back.
+
+Logging is set in `src/test/resources/logback-spring.xml` of each module, which includes Boot's `defaults.xml` and
+`console-appender.xml` and sets the levels: `org.hibernate.SQL` at DEBUG and `org.hibernate.orm.jdbc.bind` at TRACE,
+the module's `.data` package at DEBUG, podam at INFO. Keep levels there, not under `logging.level` in
+`application.yaml`, and do not add a `logback.xml` / `logback-test.xml`.

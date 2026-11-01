@@ -13,8 +13,6 @@ import com.github.jinahya.oracle.sample.schemas.persistence.hr.EmpDetailsView;
 class EmpDetailsViewRepository_DataJpaTest
         extends _Repository_DataJpaTest<EmpDetailsViewRepository, EmpDetailsView, Integer> {
 
-    // -----------------------------------------------------------------------------------------------------------------
-
     /**
      * Creates a new instance.
      */

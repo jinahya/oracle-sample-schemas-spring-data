@@ -9,27 +9,21 @@
   </parent>
 
   <artifactId>oracle-sample-schemas-spring-data-sh</artifactId>
-  <version>0.0.1-SNAPSHOT</version>
   <packaging>jar</packaging>
 
   <description>Spring Data for the sales_history schema</description>
 
   <dependencies>
-    <!-- main ======================================================================================= -->
+    <!--
+      main =======================================================================================
+      The mapped superclasses the entities of this module extend, their static metamodel (MappedSales_, ...), and
+      the converters and embeddables the mappings name. Upstream keeps its own entities in its test sources, so none
+      arrive from the jar; the ones here, in the parent package of the repositories, are copies of them. Its jakarta.*
+      dependencies are provided there, so none arrive transitively.
+      -->
     <dependency>
       <groupId>io.github.jinahya</groupId>
       <artifactId>oracle-sample-schemas-persistence-sh</artifactId>
-    </dependency>
-
-    <!-- test runtime =============================================================================== -->
-    <!--
-      The tests connect to a real Oracle instance (see src/test/resources/application.yaml). Test
-      scope, so consumers get no driver. Version from the Boot BOM.
-      -->
-    <dependency><!-- https://central.sonatype.com/artifact/com.oracle.database.jdbc/ojdbc17 -->
-      <groupId>com.oracle.database.jdbc</groupId>
-      <artifactId>ojdbc17</artifactId>
-      <scope>test</scope>
     </dependency>
 
     <!-- test tools ================================================================================= -->

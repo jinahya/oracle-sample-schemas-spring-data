@@ -13,8 +13,6 @@ import com.github.jinahya.oracle.sample.schemas.persistence.sh.Customer;
 class CustomerRepository_DataJpaTest
         extends _Repository_DataJpaTest<CustomerRepository, Customer, Long> {
 
-    // -----------------------------------------------------------------------------------------------------------------
-
     /**
      * Creates a new instance.
      */

@@ -2,7 +2,7 @@ package com.github.jinahya.oracle.sample.schemas.persistence.sh.data;
 
 import com.github.jinahya.oracle.sample.schemas.persistence.sh.Time;
 
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 /**
  * Tests {@link TimeRepository} in a JPA slice, over an embedded H2, through {@link _Repository_DataJpaTest}.
@@ -13,14 +13,12 @@ import java.time.LocalDate;
  * @see TimeRepository_SpringBootIT
  */
 class TimeRepository_DataJpaTest
-        extends _Repository_DataJpaTest<TimeRepository, Time, LocalDate> {
-
-    // -----------------------------------------------------------------------------------------------------------------
+        extends _Repository_DataJpaTest<TimeRepository, Time, LocalDateTime> {
 
     /**
      * Creates a new instance.
      */
     TimeRepository_DataJpaTest() {
-        super(TimeRepository.class, Time.class, LocalDate.class);
+        super(TimeRepository.class, Time.class, LocalDateTime.class);
     }
 }

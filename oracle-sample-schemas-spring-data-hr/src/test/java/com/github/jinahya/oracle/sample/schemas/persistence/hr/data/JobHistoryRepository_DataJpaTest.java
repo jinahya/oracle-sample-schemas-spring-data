@@ -14,8 +14,6 @@ import com.github.jinahya.oracle.sample.schemas.persistence.hr.JobHistoryId;
 class JobHistoryRepository_DataJpaTest
         extends _Repository_DataJpaTest<JobHistoryRepository, JobHistory, JobHistoryId> {
 
-    // -----------------------------------------------------------------------------------------------------------------
-
     /**
      * Creates a new instance.
      */

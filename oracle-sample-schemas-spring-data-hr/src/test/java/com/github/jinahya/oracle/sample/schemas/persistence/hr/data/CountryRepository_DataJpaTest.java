@@ -13,8 +13,6 @@ import com.github.jinahya.oracle.sample.schemas.persistence.hr.Country;
 class CountryRepository_DataJpaTest
         extends _Repository_DataJpaTest<CountryRepository, Country, String> {
 
-    // -----------------------------------------------------------------------------------------------------------------
-
     /**
      * Creates a new instance.
      */

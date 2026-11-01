@@ -13,8 +13,6 @@ import com.github.jinahya.oracle.sample.schemas.persistence.hr.Employee;
 class EmployeeRepository_DataJpaTest
         extends _Repository_DataJpaTest<EmployeeRepository, Employee, Integer> {
 
-    // -----------------------------------------------------------------------------------------------------------------
-
     /**
      * Creates a new instance.
      */

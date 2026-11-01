@@ -13,8 +13,6 @@ import com.github.jinahya.oracle.sample.schemas.persistence.sh.Product;
 class ProductRepository_DataJpaTest
         extends _Repository_DataJpaTest<ProductRepository, Product, Integer> {
 
-    // -----------------------------------------------------------------------------------------------------------------
-
     /**
      * Creates a new instance.
      */

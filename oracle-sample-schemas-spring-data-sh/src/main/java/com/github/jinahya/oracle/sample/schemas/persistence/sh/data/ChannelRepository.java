@@ -2,8 +2,6 @@ package com.github.jinahya.oracle.sample.schemas.persistence.sh.data;
 
 import com.github.jinahya.oracle.sample.schemas.persistence.sh.Channel;
 import com.github.jinahya.oracle.sample.schemas.persistence.sh.Channel_;
-import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.stereotype.Repository;
 
 /**
@@ -14,7 +12,6 @@ import org.springframework.stereotype.Repository;
  */
 @Repository
 public interface ChannelRepository
-        extends JpaRepository<Channel, Long>,
-                JpaSpecificationExecutor<Channel> {
+        extends _Repository<Channel, Long> {
 
 }

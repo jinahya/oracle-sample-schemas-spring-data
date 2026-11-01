@@ -13,8 +13,6 @@ import com.github.jinahya.oracle.sample.schemas.persistence.sh.Channel;
 class ChannelRepository_DataJpaTest
         extends _Repository_DataJpaTest<ChannelRepository, Channel, Long> {
 
-    // -----------------------------------------------------------------------------------------------------------------
-
     /**
      * Creates a new instance.
      */

@@ -7,15 +7,11 @@ import com.github.jinahya.oracle.sample.schemas.persistence.hr.Location;
  * <p>
  * See that class for the context and the transactions. There are no tests here yet; the base's own, such as its
  * {@code findById} round trips, run here.
- * <p>
- * Needs the database of {@code application.yaml} up and the HR schema installed; see that file.
  *
  * @see LocationRepository_DataJpaTest
  */
 class LocationRepository_SpringBootIT
         extends _Repository_SpringBootIT<LocationRepository, Location, Integer> {
-
-    // -----------------------------------------------------------------------------------------------------------------
 
     /**
      * Creates a new instance.

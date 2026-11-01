@@ -13,8 +13,6 @@ import com.github.jinahya.oracle.sample.schemas.persistence.hr.Region;
 class RegionRepository_DataJpaTest
         extends _Repository_DataJpaTest<RegionRepository, Region, Long> {
 
-    // -----------------------------------------------------------------------------------------------------------------
-
     /**
      * Creates a new instance.
      */
