@@ -4,8 +4,8 @@ Spring Data repositories for the
 [Human Resources](https://github.com/oracle-samples/db-sample-schemas/tree/main/human_resources) (`HR`) schema, over
 the mapped superclasses of `io.github.jinahya:oracle-sample-schemas-persistence-hr`.
 
-- Entities: `com.github.jinahya.oracle.sample.schemas.persistence.hr`, copied from upstream's test sources
-- Repositories: `com.github.jinahya.oracle.sample.schemas.persistence.hr.data`
+- Entities: `com.github.jinahya.oracle.sample.persistence.hr`, copied from upstream's test sources
+- Repositories: `com.github.jinahya.oracle.sample.persistence.hr.data`
 
 ## Repositories
 
@@ -33,7 +33,7 @@ Spring Data JPA is a `provided` dependency, so add `spring-boot-starter-data-jpa
 at the entities' package:
 
 ```java
-@EntityScan(basePackageClasses = com.github.jinahya.oracle.sample.schemas.persistence.hr.Country.class)
+@EntityScan(basePackageClasses = com.github.jinahya.oracle.sample.persistence.hr.Country.class)
 ```
 
 ## Tests

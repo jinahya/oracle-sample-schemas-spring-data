@@ -28,7 +28,7 @@
     This module's own code, the tests included. Everything not named here stays at the root's INFO, so a
     log.debug(...) in a test prints nothing without this.
     -->
-  <logger name="com.github.jinahya.oracle.sample.schemas.persistence.sh.data" level="DEBUG"/>
+  <logger name="com.github.jinahya.oracle.sample.persistence.sh.data" level="DEBUG"/>
 
   <!-- The randomizers' podam is chatty at DEBUG; the test-companion jar's randomizers run under it. -->
   <logger name="uk.co.jemos.podam" level="INFO"/>

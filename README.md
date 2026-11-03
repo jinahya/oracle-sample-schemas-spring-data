@@ -13,8 +13,8 @@ over the Jakarta Persistence mappings of
 | [`oracle-sample-schemas-spring-data-sh`](oracle-sample-schemas-spring-data-sh) | Sales History   | `io.github.jinahya:oracle-sample-schemas-persistence-sh` |       12 |
 
 Upstream publishes mapped superclasses, not entities, so each module carries its own entities, copied from upstream's
-test sources, in `com.github.jinahya.oracle.sample.schemas.persistence.<schema>`, and one repository per entity in
-`com.github.jinahya.oracle.sample.schemas.persistence.<schema>.data`. Most of the repositories, and their tests, are
+test sources, in `com.github.jinahya.oracle.sample.persistence.<schema>`, and one repository per entity in
+`com.github.jinahya.oracle.sample.persistence.<schema>.data`. Most of the repositories, and their tests, are
 still empty.
 
 ## Requirements
@@ -62,8 +62,8 @@ Spring Data JPA is a `provided` dependency, so add `spring-boot-starter-data-jpa
 the repositories' package, so point entity scanning at them:
 
 ```java
-@EntityScan(basePackageClasses = com.github.jinahya.oracle.sample.schemas.persistence.co.Customer.class)
-@EnableJpaRepositories(basePackageClasses = com.github.jinahya.oracle.sample.schemas.persistence.co.data.CustomerRepository.class)
+@EntityScan(basePackageClasses = com.github.jinahya.oracle.sample.persistence.co.Customer.class)
+@EnableJpaRepositories(basePackageClasses = com.github.jinahya.oracle.sample.persistence.co.data.CustomerRepository.class)
 ```
 
 The tables are unqualified; on Oracle, set `hibernate.default_schema` to the schema unless you connect as its owner.

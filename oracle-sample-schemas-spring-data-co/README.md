@@ -4,8 +4,8 @@ Spring Data repositories for the
 [Customer Orders](https://github.com/oracle-samples/db-sample-schemas/tree/main/customer_orders) (`CO`) schema, over
 the mapped superclasses of `io.github.jinahya:oracle-sample-schemas-persistence-co`.
 
-- Entities: `com.github.jinahya.oracle.sample.schemas.persistence.co`, copied from upstream's test sources
-- Repositories: `com.github.jinahya.oracle.sample.schemas.persistence.co.data`
+- Entities: `com.github.jinahya.oracle.sample.persistence.co`, copied from upstream's test sources
+- Repositories: `com.github.jinahya.oracle.sample.persistence.co.data`
 
 ## Repositories
 
@@ -42,7 +42,7 @@ Spring Data JPA is a `provided` dependency, so add `spring-boot-starter-data-jpa
 at the entities' package:
 
 ```java
-@EntityScan(basePackageClasses = com.github.jinahya.oracle.sample.schemas.persistence.co.Customer.class)
+@EntityScan(basePackageClasses = com.github.jinahya.oracle.sample.persistence.co.Customer.class)
 ```
 
 ## Tests

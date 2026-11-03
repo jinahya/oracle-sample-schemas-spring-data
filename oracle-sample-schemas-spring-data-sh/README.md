@@ -4,8 +4,8 @@ Spring Data repositories for the
 [Sales History](https://github.com/oracle-samples/db-sample-schemas/tree/main/sales_history) (`SH`) schema, over
 the mapped superclasses of `io.github.jinahya:oracle-sample-schemas-persistence-sh`.
 
-- Entities: `com.github.jinahya.oracle.sample.schemas.persistence.sh`, copied from upstream's test sources
-- Repositories: `com.github.jinahya.oracle.sample.schemas.persistence.sh.data`
+- Entities: `com.github.jinahya.oracle.sample.persistence.sh`, copied from upstream's test sources
+- Repositories: `com.github.jinahya.oracle.sample.persistence.sh.data`
 
 ## Repositories
 
@@ -37,7 +37,7 @@ Spring Data JPA is a `provided` dependency, so add `spring-boot-starter-data-jpa
 at the entities' package:
 
 ```java
-@EntityScan(basePackageClasses = com.github.jinahya.oracle.sample.schemas.persistence.sh.CalMonthSalesMv.class)
+@EntityScan(basePackageClasses = com.github.jinahya.oracle.sample.persistence.sh.CalMonthSalesMv.class)
 ```
 
 ## Tests

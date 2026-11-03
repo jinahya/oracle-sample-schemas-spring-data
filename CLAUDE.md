@@ -18,7 +18,7 @@ what they share, and a module's own pom names only its schema's artifacts.
 | `oracle-sample-schemas-spring-data-hr` | `io.github.jinahya:oracle-sample-schemas-persistence-hr` | `…persistence.hr` | `…persistence.hr.data` |
 | `oracle-sample-schemas-spring-data-sh` | `io.github.jinahya:oracle-sample-schemas-persistence-sh` | `…persistence.sh` | `…persistence.sh.data` |
 
-`…` is `com.github.jinahya.oracle.sample.schemas`. The test packages are the repositories' packages.
+`…` is `com.github.jinahya.oracle.sample`. The test packages are the repositories' packages.
 
 - Each `.data` package is `@NullMarked` (JSpecify: Spring Data rejects a `null` argument to a repository method with
   `IllegalArgumentException` before any query runs; a lookup that may find nothing returns `Optional`).
@@ -48,7 +48,7 @@ that exist only locally**: after a change upstream, run `./mvnw -DskipTests inst
 - **Upstream keeps its entities in `src/test`**, on purpose: which associations an entity maps, lazy or not, with what
   cascade, is an application's decision, and this project is that application. The entities here are copies of
   upstream's test entities and id classes, verbatim
-  (`oracle-sample-schemas-persistence-<schema>/src/test/java/com/github/jinahya/oracle/sample/schemas/persistence/<schema>/<Entity>.java`
+  (`oracle-sample-schemas-persistence-<schema>/src/test/java/com/github/jinahya/oracle/sample/persistence/<schema>/<Entity>.java`
   there), in the same package, so that the `test-companion` randomizers and persisters, compiled against that
   package, find them. **Keep them in step with upstream**: diff against upstream's before touching a mapping, and
   change the mapping there first.
