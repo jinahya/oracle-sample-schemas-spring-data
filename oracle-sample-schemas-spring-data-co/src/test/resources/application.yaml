@@ -4,7 +4,7 @@
 #
 # Start it from the sibling checkout, which owns the compose file and the install hook:
 #
-#     cd ../../oracle-sample-schemas-persistence && ./compose.sh
+#     cd ../../oracle-sample-schemas-persistence && ./_compose.sh
 #
 # That serves the freepdb1 PDB on localhost:1521, with CO, HR and SH installed once by the startup hook.
 #
@@ -19,9 +19,9 @@ spring:
     # nothing else: a test can read and write the sample data but cannot DDL it away. Connecting as CO would make
     # the default_schema below unnecessary, and would give the tests the right to drop the schema they read.
     username: dmlonly
-    # Both the container and the installers default to `password`; SAMPLE_SCHEMAS_PASSWORD is the knob the sibling
+    # Both the container and the installers default to `Passw0rd!`; SAMPLE_SCHEMAS_PASSWORD is the knob the sibling
     # scripts read, so honour it here too.
-    password: ${SAMPLE_SCHEMAS_PASSWORD:password}
+    password: ${SAMPLE_SCHEMAS_PASSWORD:Passw0rd!}
     # Hikari can infer this from the URL; named anyway so a missing ojdbc17 on the test classpath fails as "driver not
     # found" rather than as a pool timeout.
     driver-class-name: oracle.jdbc.OracleDriver

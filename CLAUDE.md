@@ -94,7 +94,7 @@ mvn -o enforcer:enforce -Denforcer.rules=dependencyConvergence
 Surefire's default includes do not match `*IT`, and no failsafe plugin is configured, so `test`/`verify`/`install`
 never run the `*_SpringBootIT` classes; run them explicitly with `-Dtest`.
 
-**The integration tests need the Oracle container** that upstream owns: run `../../oracle-sample-schemas-persistence/compose.sh`.
+**The integration tests need the Oracle container** that upstream owns: run `../../oracle-sample-schemas-persistence/_compose.sh`.
 It serves `freepdb1` on `localhost:1521` with CO, HR and SH installed. Each module's `src/test/resources/application.yaml`
 connects as `dmlonly` (DML only, no DDL), sets `hibernate.default_schema` to the schema, and `ddl-auto: none`. Never
 point a test at the schema owner or let it generate DDL against Oracle.
