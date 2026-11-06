@@ -1,7 +1,7 @@
 package com.github.jinahya.oracle.sample.persistence.sh.data;
 
 import com.github.jinahya.oracle.sample.persistence.sh.Sales;
-import com.github.jinahya.oracle.sample.persistence.sh.SalesId;
+import com.github.jinahya.oracle.sample.persistence.sh.mapped.SalesId;
 
 /**
  * Tests {@link SalesRepository} in a JPA slice, over an embedded H2, through {@link _Repository_DataJpaTest}.

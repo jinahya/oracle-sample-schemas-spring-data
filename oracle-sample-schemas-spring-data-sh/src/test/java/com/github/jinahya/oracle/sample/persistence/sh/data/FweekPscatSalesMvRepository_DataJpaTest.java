@@ -1,7 +1,7 @@
 package com.github.jinahya.oracle.sample.persistence.sh.data;
 
 import com.github.jinahya.oracle.sample.persistence.sh.FweekPscatSalesMv;
-import com.github.jinahya.oracle.sample.persistence.sh.FweekPscatSalesMvId;
+import com.github.jinahya.oracle.sample.persistence.sh.mapped.FweekPscatSalesMvId;
 
 /**
  * Tests {@link FweekPscatSalesMvRepository} in a JPA slice, over an embedded H2, through {@link _Repository_DataJpaTest}.

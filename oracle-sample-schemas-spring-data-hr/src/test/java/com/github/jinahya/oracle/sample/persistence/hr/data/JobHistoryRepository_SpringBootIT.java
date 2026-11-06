@@ -1,7 +1,7 @@
 package com.github.jinahya.oracle.sample.persistence.hr.data;
 
 import com.github.jinahya.oracle.sample.persistence.hr.JobHistory;
-import com.github.jinahya.oracle.sample.persistence.hr.JobHistoryId;
+import com.github.jinahya.oracle.sample.persistence.hr.mapped.JobHistoryId;
 
 /**
  * Tests {@link JobHistoryRepository} against the installed HR schema, through {@link _Repository_SpringBootIT}.

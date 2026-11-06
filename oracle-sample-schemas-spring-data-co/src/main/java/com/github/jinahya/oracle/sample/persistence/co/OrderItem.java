@@ -20,6 +20,7 @@ package com.github.jinahya.oracle.sample.persistence.co;
  * #L%
  */
 
+import com.github.jinahya.oracle.sample.persistence.co.mapped.OrderItemId;
 import com.github.jinahya.oracle.sample.persistence.co.mapped.MappedOrderItem;
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
@@ -29,77 +30,20 @@ import jakarta.persistence.FetchType;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.MapsId;
-import jakarta.persistence.NamedQuery;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 
+import java.util.Objects;
 import java.util.Optional;
 
 /**
- * An entity class for mapping the {@value MappedOrderItem#TABLE_NAME} table, whose composite primary key is
- * mapped with an {@link jakarta.persistence.EmbeddedId @EmbeddedId}.
+ * An entity class for mapping the {@value MappedOrderItem#TABLE_NAME} table, whose composite
+ * primary key is mapped with an {@link jakarta.persistence.EmbeddedId @EmbeddedId}.
  *
  * @author Jin Kwon &lt;onacit_at_gmail.com&gt;
  */
-@NamedQuery(name = "OrderItem.selectOneByOrderIdAndLineItemId",
-            query = """
-                    SELECT e
-                    FROM OrderItem e
-                    WHERE e.id.orderId = :orderId
-                      AND e.id.lineItemId = :lineItemId"""
-)
-@NamedQuery(name = "OrderItem.selectListOrderByOrderIdAscLineItemIdAsc",
-            query = """
-                    SELECT e
-                    FROM OrderItem e
-                    ORDER BY e.id.orderId ASC, e.id.lineItemId ASC"""
-)
-@NamedQuery(name = "OrderItem.countAll",
-            query = """
-                    SELECT COUNT(e)
-                    FROM OrderItem e"""
-)
-@NamedQuery(name = "OrderItem.selectListByOrderOrderByLineItemIdAsc",
-            query = """
-                    SELECT e
-                    FROM OrderItem e
-                    WHERE e.order = :order
-                    ORDER BY e.id.lineItemId ASC"""
-)
-@NamedQuery(name = "OrderItem.countByOrder",
-            query = """
-                    SELECT COUNT(e)
-                    FROM OrderItem e
-                    WHERE e.order = :order"""
-)
-@NamedQuery(name = "OrderItem.selectListByProductOrderByOrderIdAscLineItemIdAsc",
-            query = """
-                    SELECT e
-                    FROM OrderItem e
-                    WHERE e.product = :product
-                    ORDER BY e.id.orderId ASC, e.id.lineItemId ASC"""
-)
-@NamedQuery(name = "OrderItem.countByProduct",
-            query = """
-                    SELECT COUNT(e)
-                    FROM OrderItem e
-                    WHERE e.product = :product"""
-)
-@NamedQuery(name = "OrderItem.selectListByShipmentOrderByOrderIdAscLineItemIdAsc",
-            query = """
-                    SELECT e
-                    FROM OrderItem e
-                    WHERE e.shipment = :shipment
-                    ORDER BY e.id.orderId ASC, e.id.lineItemId ASC"""
-)
-@NamedQuery(name = "OrderItem.countByShipment",
-            query = """
-                    SELECT COUNT(e)
-                    FROM OrderItem e
-                    WHERE e.shipment = :shipment"""
-)
 @Entity
 @Table(name = MappedOrderItem.TABLE_NAME,
        uniqueConstraints = {
@@ -109,38 +53,61 @@ import java.util.Optional;
                                OrderItem.COLUMN_NAME_PRODUCT_ID,
                        }
                )
-       }
+       },
+       comment = "Details of which products the customer has purchased in an order"
 )
 public class OrderItem
-        extends MappedOrderItem<OrderItemId> {
+        extends MappedOrderItem {
 
-    // -------------------------------------------------------------------------------------------------------- ORDER_ID
+    // ------------------------------------------------------------------------------------ ORDER_ID
 
     /**
      * The name of the {@link jakarta.persistence.ManyToOne @ManyToOne} association which maps the
-     * {@value #COLUMN_NAME_ORDER_ID} column. The association is {@link jakarta.persistence.MapsId @MapsId} to the
-     * {@value #ATTRIBUTE_PATH_ID_ORDER_ID} attribute, so it is the association which writes the column. The value is
-     * {@value}.
+     * {@value #COLUMN_NAME_ORDER_ID} column. The association is
+     * {@link jakarta.persistence.MapsId @MapsId} to the {@value #ATTRIBUTE_PATH_ID_ORDER_ID}
+     * attribute, so it is the association which writes the column. The value is {@value}.
      */
     public static final String ATTRIBUTE_NAME_ORDER = "order";
 
-    // -------------------------------------------------------------------------------------------- PRODUCT_ID / product
+    // ------------------------------------------------------------------------ PRODUCT_ID / product
 
     /**
-     * The name of the {@link jakarta.persistence.ManyToOne @ManyToOne} association which joins on the
-     * {@value #COLUMN_NAME_PRODUCT_ID} column. The value is {@value}.
+     * The name of the {@link jakarta.persistence.ManyToOne @ManyToOne} association which joins on
+     * the {@value #COLUMN_NAME_PRODUCT_ID} column. The value is {@value}.
      */
     public static final String ATTRIBUTE_NAME_PRODUCT = "product";
 
-    // ------------------------------------------------------------------------------------------ SHIPMENT_ID / shipment
+    // ---------------------------------------------------------------------- SHIPMENT_ID / shipment
 
     /**
-     * The name of the {@link jakarta.persistence.ManyToOne @ManyToOne} association which joins on the
-     * {@value #COLUMN_NAME_SHIPMENT_ID} column. The value is {@value}.
+     * The name of the {@link jakarta.persistence.ManyToOne @ManyToOne} association which joins on
+     * the {@value #COLUMN_NAME_SHIPMENT_ID} column. The value is {@value}.
      */
     public static final String ATTRIBUTE_NAME_SHIPMENT = "shipment";
 
-    // ---------------------------------------------------------------------------------------------------- CONSTRUCTORS
+    // ---------------------------------------------------------------------- STATIC_FACTORY_METHODS
+
+    /**
+     * Creates a new instance with the specified values of its key, in key order: the order, whose
+     * identifier is the {@value #ATTRIBUTE_PATH_ID_ORDER_ID} attribute through
+     * {@link jakarta.persistence.MapsId @MapsId}, and the {@value #ATTRIBUTE_PATH_ID_LINE_ITEM_ID}
+     * attribute, a value of the row's own.
+     *
+     * @param order      a value for the {@value #ATTRIBUTE_NAME_ORDER} attribute.
+     * @param lineItemId a value for the {@value #ATTRIBUTE_PATH_ID_LINE_ITEM_ID} attribute.
+     * @return a new instance.
+     */
+    public static OrderItem of(final Order order, final Long lineItemId) {
+        Objects.requireNonNull(order, "order is null");
+        Objects.requireNonNull(lineItemId, "lineItemId is null");
+        final var instance = new OrderItem();
+        instance.setId_(new OrderItemId());
+        instance.getId_().setLineItemId(lineItemId);
+        instance.setOrder(order);
+        return instance;
+    }
+
+    // -------------------------------------------------------------------------------- CONSTRUCTORS
 
     /**
      * Creates a new instance.
@@ -149,46 +116,46 @@ public class OrderItem
         super();
     }
 
-    // -------------------------------------------------------------------------------------------------------------- id
+    // ----------------------------------------------------------------------------------------- id_
 
     /**
-     * Returns current value of {@value #ATTRIBUTE_NAME_ID} attribute.
+     * Returns current value of {@value #ATTRIBUTE_NAME_ID_} attribute.
      *
-     * @return current value of {@value #ATTRIBUTE_NAME_ID} attribute.
+     * @return current value of {@value #ATTRIBUTE_NAME_ID_} attribute.
      */
     @Override
-    public OrderItemId getId() {
-        return id;
+    public OrderItemId getId_() {
+        return id_;
     }
 
     /**
-     * Replaces current value of {@value #ATTRIBUTE_NAME_ID} attribute with the specified value.
+     * Replaces current value of {@value #ATTRIBUTE_NAME_ID_} attribute with the specified value.
      *
-     * @param id new value for {@value #ATTRIBUTE_NAME_ID} attribute.
+     * @param id_ new value for {@value #ATTRIBUTE_NAME_ID_} attribute.
      */
     @Override
-    protected void setId(final OrderItemId id) {
-        this.id = id;
+    protected void setId_(final OrderItemId id_) {
+        this.id_ = id_;
     }
 
-    // --------------------------------------------------------------------------------------------------------- orderId
+    // ------------------------------------------------------------------------------------- orderId
 
     /**
-     * Replaces current value of {@value #ATTRIBUTE_PATH_ID_ORDER_ID} attribute with the specified value, creating the
-     * {@value #ATTRIBUTE_NAME_ID} attribute first when it is {@code null}.
+     * Replaces current value of {@value #ATTRIBUTE_PATH_ID_ORDER_ID} attribute with the specified
+     * value, creating the {@value #ATTRIBUTE_NAME_ID_} attribute first when it is {@code null}.
      *
      * @param orderId new value for {@value #ATTRIBUTE_PATH_ID_ORDER_ID} attribute.
      */
     protected void setOrderId(final Long orderId) {
-        Optional.ofNullable(getId())
+        Optional.ofNullable(getId_())
                 .orElseGet(() -> {
-                    setId(new OrderItemId());
-                    return getId();
+                    setId_(new OrderItemId());
+                    return getId_();
                 })
                 .setOrderId(orderId);
     }
 
-    // ----------------------------------------------------------------------------------------------------------- order
+    // --------------------------------------------------------------------------------------- order
 
     /**
      * Returns current value of {@value #ATTRIBUTE_NAME_ORDER} attribute.
@@ -201,8 +168,9 @@ public class OrderItem
     }
 
     /**
-     * Replaces current value of {@value #ATTRIBUTE_NAME_ORDER} attribute with the specified value, and current value of
-     * {@value #ATTRIBUTE_PATH_ID_ORDER_ID} attribute with the specified value's identifier.
+     * Replaces current value of {@value #ATTRIBUTE_NAME_ORDER} attribute with the specified value,
+     * and current value of {@value #ATTRIBUTE_PATH_ID_ORDER_ID} attribute with the specified
+     * value's identifier.
      *
      * @param order new value for {@value #ATTRIBUTE_NAME_ORDER} attribute.
      */
@@ -213,7 +181,7 @@ public class OrderItem
         );
     }
 
-    // --------------------------------------------------------------------------------------------------------- product
+    // ------------------------------------------------------------------------------------- product
 
     /**
      * Returns current value of {@value #ATTRIBUTE_NAME_PRODUCT} attribute.
@@ -226,8 +194,9 @@ public class OrderItem
     }
 
     /**
-     * Replaces current value of {@value #ATTRIBUTE_NAME_PRODUCT} attribute with the specified value, and current value
-     * of {@value #ATTRIBUTE_NAME_PRODUCT_ID} attribute with the specified value's identifier.
+     * Replaces current value of {@value #ATTRIBUTE_NAME_PRODUCT} attribute with the specified
+     * value, and current value of {@value #ATTRIBUTE_NAME_PRODUCT_ID} attribute with the specified
+     * value's identifier.
      *
      * @param product new value for {@value #ATTRIBUTE_NAME_PRODUCT} attribute.
      */
@@ -236,7 +205,7 @@ public class OrderItem
         setProductId(Optional.ofNullable(product).map(Product::getProductId).orElse(null));
     }
 
-    // -------------------------------------------------------------------------------------------------------- shipment
+    // ------------------------------------------------------------------------------------ shipment
 
     /**
      * Returns the shipment which carries this order item.
@@ -251,31 +220,35 @@ public class OrderItem
     /**
      * Replaces the shipment which carries this order item.
      *
-     * @param shipment new shipment which carries this order item; {@code null} for an item not yet shipped.
+     * @param shipment new shipment which carries this order item; {@code null} for an item not yet
+     *                 shipped.
      */
     public void setShipment(@Nullable final Shipment shipment) {
         this.shipment = shipment;
         setShipmentId(Optional.ofNullable(shipment).map(Shipment::getShipmentId).orElse(null));
     }
 
-    // -----------------------------------------------------------------------------------------------------------------
+    // ---------------------------------------------------------------------------------------------
     @Valid
     @NotNull
     @EmbeddedId
-    private OrderItemId id;
+    private OrderItemId id_;
 
-    // -----------------------------------------------------------------------------------------------------------------
+    // ---------------------------------------------------------------------------------------------
     @Nonnull
     @Valid
     @NotNull
-    // the association owns ORDER_ID, and the provider copies the order's id into the embedded id; @MapsId is what
-    // ties the two together, so the column is written from here rather than from a mirroring attribute
+    // the association owns ORDER_ID, and the provider copies the order's id into the embedded
+    // id; @MapsId is what
+    // ties the two together, so the column is written from here rather than from a mirroring
+    // attribute
     @MapsId(OrderItemId.ATTRIBUTE_NAME_ORDER_ID)
     @ManyToOne(optional = false, fetch = FetchType.LAZY)
-    @JoinColumn(name = COLUMN_NAME_ORDER_ID, referencedColumnName = Order.COLUMN_NAME_ORDER_ID, nullable = false)
+    @JoinColumn(name = COLUMN_NAME_ORDER_ID, referencedColumnName = Order.COLUMN_NAME_ORDER_ID,
+                nullable = false)
     private Order order;
 
-    // -----------------------------------------------------------------------------------------------------------------
+    // ---------------------------------------------------------------------------------------------
     @Nonnull
     @Valid
     @NotNull
@@ -288,7 +261,7 @@ public class OrderItem
     )
     private Product product;
 
-    // -----------------------------------------------------------------------------------------------------------------
+    // ---------------------------------------------------------------------------------------------
     @Nullable
     @Valid
     @ManyToOne(optional = true, fetch = FetchType.LAZY)

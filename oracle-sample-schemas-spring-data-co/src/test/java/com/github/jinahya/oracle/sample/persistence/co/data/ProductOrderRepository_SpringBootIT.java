@@ -1,7 +1,7 @@
 package com.github.jinahya.oracle.sample.persistence.co.data;
 
 import com.github.jinahya.oracle.sample.persistence.co.ProductOrder;
-import com.github.jinahya.oracle.sample.persistence.co.ProductOrderId;
+import com.github.jinahya.oracle.sample.persistence.co.mapped.ProductOrderId;
 
 /**
  * Tests {@link ProductOrderRepository} against the installed CO schema, through {@link _Repository_SpringBootIT}.

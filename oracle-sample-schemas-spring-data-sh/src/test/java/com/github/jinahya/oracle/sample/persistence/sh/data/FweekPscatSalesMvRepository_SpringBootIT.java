@@ -1,7 +1,7 @@
 package com.github.jinahya.oracle.sample.persistence.sh.data;
 
 import com.github.jinahya.oracle.sample.persistence.sh.FweekPscatSalesMv;
-import com.github.jinahya.oracle.sample.persistence.sh.FweekPscatSalesMvId;
+import com.github.jinahya.oracle.sample.persistence.sh.mapped.FweekPscatSalesMvId;
 
 /**
  * Tests {@link FweekPscatSalesMvRepository} against the installed SH schema, through {@link _Repository_SpringBootIT}.

@@ -23,7 +23,6 @@ package com.github.jinahya.oracle.sample.persistence.hr;
 import com.github.jinahya.oracle.sample.persistence.hr.mapped.MappedJob;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
-import jakarta.persistence.NamedQuery;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import jakarta.validation.Valid;
@@ -36,64 +35,32 @@ import java.util.List;
  *
  * @author Jin Kwon &lt;onacit_at_gmail.com&gt;
  */
-@NamedQuery(name = "Job.Select__OrderByMaxSalaryDescNullsLast",
-            query = """
-                    SELECT e
-                    FROM Job e
-                    ORDER BY e.maxSalary DESC NULLS LAST"""
-)
-@NamedQuery(name = "Job.Select__OrderByMinSalaryAscNullsFirst",
-            query = """
-                    SELECT e
-                    FROM Job e
-                    ORDER BY e.minSalary ASC NULLS FIRST"""
-)
-@NamedQuery(name = "Job.selectOneByJobId",
-            query = """
-                    SELECT e
-                    FROM Job e
-                    WHERE e.jobId = :jobId"""
-)
-@NamedQuery(name = "Job.selectListOrderByJobIdAsc",
-            query = """
-                    SELECT e
-                    FROM Job e
-                    ORDER BY e.jobId ASC"""
-)
-@NamedQuery(name = "Job.selectListOrderByJobIdAscJobIdGt",
-            query = """
-                    SELECT e
-                    FROM Job e
-                    WHERE e.jobId > :jobIdMinExclusive
-                    ORDER BY e.jobId ASC"""
-)
-@NamedQuery(name = "Job.countAll",
-            query = """
-                    SELECT COUNT(e)
-                    FROM Job e"""
-)
 @Entity
-@Table(name = MappedJob.TABLE_NAME)
-public class Job extends MappedJob {
+@Table(name = MappedJob.TABLE_NAME,
+       comment = "jobs table with job titles and salary ranges.\n" +
+               "References with employees and job_history table.")
+public class Job
+        extends MappedJob {
 
-    // ------------------------------------------------------------------------------------------------------- EMPLOYEES
+    // ----------------------------------------------------------------------------------- EMPLOYEES
 
     /**
-     * The name of the attribute which maps the {@link Employee employee}s assigned to this job, mapped by
-     * {@value Employee#ATTRIBUTE_NAME_JOB}. The value is {@value}.
+     * The name of the attribute which maps the {@link Employee employee}s assigned to this job,
+     * mapped by {@value Employee#ATTRIBUTE_NAME_JOB}. The value is {@value}.
      */
     public static final String ATTRIBUTE_NAME_EMPLOYEES = "employees";
 
-    // --------------------------------------------------------------------------------------------------- JOB_HISTORIES
+    // ------------------------------------------------------------------------------- JOB_HISTORIES
 
     /**
-     * The name of the attribute which maps the past assignments to this job. The value is {@value}.
+     * The name of the attribute which maps the past assignments to this job. The value is
+     * {@value}.
      *
      * @see JobHistory#ATTRIBUTE_NAME_JOB
      */
     public static final String ATTRIBUTE_NAME_JOB_HISTORIES = "jobHistories";
 
-    // ---------------------------------------------------------------------------------------------------- CONSTRUCTORS
+    // -------------------------------------------------------------------------------- CONSTRUCTORS
 
     /**
      * Creates a new instance.
@@ -102,7 +69,7 @@ public class Job extends MappedJob {
         super();
     }
 
-    // ------------------------------------------------------------------------------------------------------- employees
+    // ----------------------------------------------------------------------------------- employees
 
     /**
      * Returns current value of {@value #ATTRIBUTE_NAME_EMPLOYEES} attribute.
@@ -117,7 +84,7 @@ public class Job extends MappedJob {
         this.employees = employees;
     }
 
-    // ---------------------------------------------------------------------------------------------------- jobHistories
+    // -------------------------------------------------------------------------------- jobHistories
 
     /**
      * Returns the past assignments to this job.
@@ -137,7 +104,7 @@ public class Job extends MappedJob {
         this.jobHistories = jobHistories;
     }
 
-    // -----------------------------------------------------------------------------------------------------------------
+    // ---------------------------------------------------------------------------------------------
     @OneToMany(mappedBy = Employee.ATTRIBUTE_NAME_JOB,
                fetch = FetchType.LAZY,
                cascade = {
@@ -146,7 +113,7 @@ public class Job extends MappedJob {
     )
     private List<@Valid @NotNull Employee> employees;
 
-    // -----------------------------------------------------------------------------------------------------------------
+    // ---------------------------------------------------------------------------------------------
     @OneToMany(mappedBy = JobHistory.ATTRIBUTE_NAME_JOB,
                fetch = FetchType.LAZY,
                cascade = {

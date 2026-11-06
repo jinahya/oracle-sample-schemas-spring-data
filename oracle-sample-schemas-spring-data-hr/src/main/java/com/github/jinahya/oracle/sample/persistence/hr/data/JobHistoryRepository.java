@@ -1,8 +1,8 @@
 package com.github.jinahya.oracle.sample.persistence.hr.data;
 
 import com.github.jinahya.oracle.sample.persistence.hr.JobHistory;
-import com.github.jinahya.oracle.sample.persistence.hr.JobHistoryId;
 import com.github.jinahya.oracle.sample.persistence.hr.JobHistory_;
+import com.github.jinahya.oracle.sample.persistence.hr.mapped.JobHistoryId;
 import org.springframework.stereotype.Repository;
 
 /**

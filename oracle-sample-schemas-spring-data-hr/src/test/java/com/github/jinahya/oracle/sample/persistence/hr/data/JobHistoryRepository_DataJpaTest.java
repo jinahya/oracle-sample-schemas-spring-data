@@ -1,7 +1,7 @@
 package com.github.jinahya.oracle.sample.persistence.hr.data;
 
 import com.github.jinahya.oracle.sample.persistence.hr.JobHistory;
-import com.github.jinahya.oracle.sample.persistence.hr.JobHistoryId;
+import com.github.jinahya.oracle.sample.persistence.hr.mapped.JobHistoryId;
 
 /**
  * Tests {@link JobHistoryRepository} in a JPA slice, over an embedded H2, through {@link _Repository_DataJpaTest}.

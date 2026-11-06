@@ -20,12 +20,8 @@ import java.math.BigDecimal;
  * metamodel rather than by string, for example
  * {@code (root, query, builder) -> builder.equal(root.get(Product_.productName), name)}.
  * <p>
- * {@link Product} declares named queries too ({@code Product.selectListOrderByProductIdAsc},
- * {@code Product.selectListOrderByProductIdAscProductIdGt},
- * {@code Product.selectListByUnitPriceBetweenOrderByUnitPricesAsc} and
- * {@code Product.selectListByUnitPriceGreaterThanEqualAndUnitPriceLessThanOrderByUnitPricesAsc}), but no method here
- * runs them yet. One that does is named after the query, as in {@link CustomerRepository}, and binds its parameters
- * with {@code @Param}. The methods below derive their queries from their names instead.
+ * The methods below derive their queries from their names. {@link Product} declares no named query; a method that
+ * runs one is named after a query declared on the entity, as in {@link CustomerRepository}.
  *
  * @see Product
  * @see Product_

@@ -26,7 +26,6 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
-import jakarta.persistence.NamedQuery;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import jakarta.validation.Valid;
@@ -40,93 +39,50 @@ import java.util.Optional;
  *
  * @author Myoungkwon Hwang
  */
-@NamedQuery(name = "Department.selectOneByDepartmentId",
-            query = """
-                    SELECT e
-                    FROM Department e
-                    WHERE e.departmentId = :departmentId"""
-)
-@NamedQuery(name = "Department.selectListOrderByDepartmentIdAsc",
-            query = """
-                    SELECT e
-                    FROM Department e
-                    ORDER BY e.departmentId ASC"""
-)
-@NamedQuery(name = "Department.selectListOrderByDepartmentIdAscDepartmentIdGt",
-            query = """
-                    SELECT e
-                    FROM Department e
-                    WHERE e.departmentId > :departmentIdMinExclusive
-                    ORDER BY e.departmentId ASC"""
-)
-@NamedQuery(name = "Department.countAll",
-            query = """
-                    SELECT COUNT(e)
-                    FROM Department e"""
-)
-@NamedQuery(name = "Department.selectListByManagerOrderByDepartmentIdAsc",
-            query = """
-                    SELECT e
-                    FROM Department e
-                    WHERE e.manager = :manager
-                    ORDER BY e.departmentId ASC"""
-)
-@NamedQuery(name = "Department.countByManager",
-            query = """
-                    SELECT COUNT(e)
-                    FROM Department e
-                    WHERE e.manager = :manager"""
-)
-@NamedQuery(name = "Department.selectListByLocationOrderByDepartmentIdAsc",
-            query = """
-                    SELECT e
-                    FROM Department e
-                    WHERE e.location = :location
-                    ORDER BY e.departmentId ASC"""
-)
-@NamedQuery(name = "Department.countByLocation",
-            query = """
-                    SELECT COUNT(e)
-                    FROM Department e
-                    WHERE e.location = :location"""
-)
 @Entity
-@Table(name = MappedDepartment.TABLE_NAME)
-public class Department extends MappedDepartment {
+@Table(name = MappedDepartment.TABLE_NAME,
+       comment = "Departments table that shows details of departments where employees\n" +
+               "work. references with locations, employees, and job_history tables.")
+public class Department
+        extends MappedDepartment {
 
-    // ------------------------------------------------------------------------------------------------------ MANAGER_ID
+    // ---------------------------------------------------------------------------------- MANAGER_ID
 
     /**
-     * The name of the attribute which maps the {@value #COLUMN_NAME_MANAGER_ID} column. The value is {@value}.
+     * The name of the attribute which maps the {@value #COLUMN_NAME_MANAGER_ID} column. The value
+     * is {@value}.
      */
     public static final String ATTRIBUTE_NAME_MANAGER = "manager";
 
-    // ----------------------------------------------------------------------------------------------------- LOCATION_ID
+    // --------------------------------------------------------------------------------- LOCATION_ID
 
     /**
-     * The name of the attribute which maps the {@value #COLUMN_NAME_LOCATION_ID} column. The value is {@value}.
+     * The name of the attribute which maps the {@value #COLUMN_NAME_LOCATION_ID} column. The value
+     * is {@value}.
      */
     public static final String ATTRIBUTE_NAME_LOCATION = "location";
 
-    // ------------------------------------------------------------------------------------------------------- EMPLOYEES
+    // ----------------------------------------------------------------------------------- EMPLOYEES
 
     /**
-     * The name of the attribute which maps the {@link Employee employee}s of this department. The value is {@value}.
+     * The name of the attribute which maps the {@link Employee employee}s of this department. The
+     * value is {@value}.
      *
      * @see Employee#ATTRIBUTE_NAME_DEPARTMENT
      */
     public static final String ATTRIBUTE_NAME_EMPLOYEES = "employees";
 
-    // --------------------------------------------------------------------------------------------------- JOB_HISTORIES
+    // ------------------------------------------------------------------------------- JOB_HISTORIES
 
     /**
-     * The name of the attribute which maps the past job assignments within this department. The value is {@value}.
+     * The name of the attribute which maps the past job assignments within this department. The
+     * value is {@value}.
      *
      * @see JobHistory#ATTRIBUTE_NAME_DEPARTMENT
      */
     public static final String ATTRIBUTE_NAME_JOB_HISTORIES = "jobHistories";
 
-    // ---------------------------------------------------------------------------------------------------- CONSTRUCTORS
+    // -------------------------------------------------------------------------------- CONSTRUCTORS
 
     /**
      * Creates a new instance.
@@ -135,7 +91,7 @@ public class Department extends MappedDepartment {
         super();
     }
 
-    // --------------------------------------------------------------------------------------------------------- manager
+    // ------------------------------------------------------------------------------------- manager
 
     /**
      * Returns current value of {@value #ATTRIBUTE_NAME_MANAGER} attribute.
@@ -148,8 +104,8 @@ public class Department extends MappedDepartment {
     }
 
     /**
-     * Replaces current value of {@value #ATTRIBUTE_NAME_MANAGER} attribute with the specified value, and the
-     * {@value #ATTRIBUTE_NAME_MANAGER_ID} attribute with its identifier.
+     * Replaces current value of {@value #ATTRIBUTE_NAME_MANAGER} attribute with the specified
+     * value, and the {@value #ATTRIBUTE_NAME_MANAGER_ID} attribute with its identifier.
      *
      * @param manager new value for {@value #ATTRIBUTE_NAME_MANAGER} attribute.
      */
@@ -162,7 +118,7 @@ public class Department extends MappedDepartment {
         );
     }
 
-    // -------------------------------------------------------------------------------------------------------- location
+    // ------------------------------------------------------------------------------------ location
 
     /**
      * Returns current value of {@value #ATTRIBUTE_NAME_LOCATION} attribute.
@@ -175,8 +131,8 @@ public class Department extends MappedDepartment {
     }
 
     /**
-     * Replaces current value of {@value #ATTRIBUTE_NAME_LOCATION} attribute with the specified value, and the
-     * {@value #ATTRIBUTE_NAME_LOCATION_ID} attribute with its identifier.
+     * Replaces current value of {@value #ATTRIBUTE_NAME_LOCATION} attribute with the specified
+     * value, and the {@value #ATTRIBUTE_NAME_LOCATION_ID} attribute with its identifier.
      *
      * @param location new value for {@value #ATTRIBUTE_NAME_LOCATION} attribute.
      */
@@ -189,7 +145,7 @@ public class Department extends MappedDepartment {
         );
     }
 
-    // ------------------------------------------------------------------------------------------------------- employees
+    // ----------------------------------------------------------------------------------- employees
     List<Employee> getEmployees() {
         return employees;
     }
@@ -198,7 +154,7 @@ public class Department extends MappedDepartment {
         this.employees = employees;
     }
 
-    // ---------------------------------------------------------------------------------------------------- jobHistories
+    // -------------------------------------------------------------------------------- jobHistories
 
     /**
      * Returns the past job assignments within this department.
@@ -218,7 +174,7 @@ public class Department extends MappedDepartment {
         this.jobHistories = jobHistories;
     }
 
-    // -----------------------------------------------------------------------------------------------------------------
+    // ---------------------------------------------------------------------------------------------
     @Nullable
     @Valid
     @ManyToOne(optional = true, fetch = FetchType.LAZY)
@@ -229,7 +185,7 @@ public class Department extends MappedDepartment {
     )
     private Employee manager;
 
-    // -----------------------------------------------------------------------------------------------------------------
+    // ---------------------------------------------------------------------------------------------
     @Nullable
     @Valid
     @ManyToOne(optional = true, fetch = FetchType.LAZY)
@@ -240,7 +196,7 @@ public class Department extends MappedDepartment {
     )
     private Location location;
 
-    // -----------------------------------------------------------------------------------------------------------------
+    // ---------------------------------------------------------------------------------------------
     @OneToMany(mappedBy = Employee.ATTRIBUTE_NAME_DEPARTMENT,
                fetch = FetchType.LAZY,
                cascade = {
@@ -249,7 +205,7 @@ public class Department extends MappedDepartment {
     )
     private List<@Valid @NotNull Employee> employees;
 
-    // -----------------------------------------------------------------------------------------------------------------
+    // ---------------------------------------------------------------------------------------------
     @OneToMany(mappedBy = JobHistory.ATTRIBUTE_NAME_DEPARTMENT,
                fetch = FetchType.LAZY,
                cascade = {

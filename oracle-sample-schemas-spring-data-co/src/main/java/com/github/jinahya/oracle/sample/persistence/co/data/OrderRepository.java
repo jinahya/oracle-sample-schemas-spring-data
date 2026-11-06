@@ -24,10 +24,8 @@ import org.springframework.stereotype.Repository;
  * metamodel rather than by string, for example
  * {@code (root, query, builder) -> builder.equal(root.get(Order_.customer), customer)}.
  * <p>
- * {@link Order} declares named queries too ({@code Order.selectListByCustomerOrderByOrderTmsDesc},
- * {@code Order.selectListByCustomerOrderIdGtOrderByOrderTmsDesc} and {@code Order.countByCustomer}, among others),
- * but no method here runs them. One that does is named after the query, as in {@link CustomerRepository}, and binds its
- * parameters with {@code @Param}. The methods below derive their queries from their names instead.
+ * The methods below derive their queries from their names. {@link Order} declares no named query; a method that runs
+ * one is named after a query declared on the entity, as in {@link CustomerRepository}.
  *
  * @see Order
  * @see Order_

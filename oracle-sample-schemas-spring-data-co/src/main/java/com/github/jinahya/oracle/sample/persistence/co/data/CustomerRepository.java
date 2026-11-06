@@ -18,10 +18,10 @@ import java.util.Optional;
  * metamodel rather than by string, for example
  * {@code (root, query, builder) -> builder.equal(root.get(Customer_.fullName), name)}.
  * <p>
- * {@link Customer} also declares named queries, each named {@code Customer.<query name>}. JPA does not require that
- * prefix, only that a name be unique in the persistence unit, but it is the usual convention, and it is what Spring
- * Data's lookup builds on: a method named after the query, such as {@link #selectOneByEmailAddress(String)}, runs it
- * with no annotation. A method named otherwise can still run one through {@code @Query(name = ...)}.
+ * {@link Customer} also declares a named query, {@code Customer.selectOneByEmailAddress}. JPA does not require the
+ * {@code Customer.} prefix, only that a name be unique in the persistence unit, but it is the usual convention, and it
+ * is what Spring Data's lookup builds on: a method named after the query, {@link #selectOneByEmailAddress(String)},
+ * runs it with no annotation. A method named otherwise can still run one through {@code @Query(name = ...)}.
  *
  * @see Customer
  * @see Customer_

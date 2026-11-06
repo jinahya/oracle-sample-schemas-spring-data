@@ -23,7 +23,6 @@ package com.github.jinahya.oracle.sample.persistence.co;
 import com.github.jinahya.oracle.sample.persistence.co.mapped.MappedStore;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
-import jakarta.persistence.NamedQuery;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import jakarta.validation.Valid;
@@ -36,41 +35,13 @@ import java.util.List;
  *
  * @author Jin Kwon &lt;onacit_at_gmail.com&gt;
  */
-@NamedQuery(name = "Store.selectSingleByStoreName",
-            query = """
-                    SELECT e
-                    FROM Store AS e
-                    WHERE e.storeName = :storeName""")
-@NamedQuery(name = "Store.selectOneByStoreId",
-            query = """
-                    SELECT e
-                    FROM Store e
-                    WHERE e.storeId = :storeId"""
-)
-@NamedQuery(name = "Store.selectListOrderByStoreIdAsc",
-            query = """
-                    SELECT e
-                    FROM Store e
-                    ORDER BY e.storeId ASC"""
-)
-@NamedQuery(name = "Store.selectListOrderByStoreIdAscStoreIdGt",
-            query = """
-                    SELECT e
-                    FROM Store e
-                    WHERE e.storeId > :storeIdMinExclusive
-                    ORDER BY e.storeId ASC"""
-)
-@NamedQuery(name = "Store.countAll",
-            query = """
-                    SELECT COUNT(e)
-                    FROM Store e"""
-)
 @Entity
-@Table(name = MappedStore.TABLE_NAME)
+@Table(name = MappedStore.TABLE_NAME,
+       comment = "Physical and virtual locations where people can purchase products")
 public class Store
         extends MappedStore {
 
-    // ---------------------------------------------------------------------------------------------------------- ORDERS
+    // -------------------------------------------------------------------------------------- ORDERS
 
     /**
      * The name of the attribute which maps the orders placed at this store. The value is {@value}.
@@ -79,25 +50,27 @@ public class Store
      */
     public static final String ATTRIBUTE_NAME_ORDERS = "orders";
 
-    // ------------------------------------------------------------------------------------------------------- SHIPMENTS
+    // ----------------------------------------------------------------------------------- SHIPMENTS
 
     /**
-     * The name of the attribute which maps the shipments dispatched from this store. The value is {@value}.
+     * The name of the attribute which maps the shipments dispatched from this store. The value is
+     * {@value}.
      *
      * @see Shipment#ATTRIBUTE_NAME_STORE
      */
     public static final String ATTRIBUTE_NAME_SHIPMENTS = "shipments";
 
-    // ----------------------------------------------------------------------------------------------------- INVENTORIES
+    // --------------------------------------------------------------------------------- INVENTORIES
 
     /**
-     * The name of the attribute which maps the inventories held by this store. The value is {@value}.
+     * The name of the attribute which maps the inventories held by this store. The value is
+     * {@value}.
      *
      * @see Inventory#ATTRIBUTE_NAME_STORE
      */
     public static final String ATTRIBUTE_NAME_INVENTORIES = "inventories";
 
-    // ---------------------------------------------------------------------------------------------------- CONSTRUCTORS
+    // -------------------------------------------------------------------------------- CONSTRUCTORS
 
     /**
      * Creates a new instance.
@@ -106,7 +79,7 @@ public class Store
         super();
     }
 
-    // ---------------------------------------------------------------------------------------------------------- orders
+    // -------------------------------------------------------------------------------------- orders
 
     /**
      * Returns the orders placed at this store.
@@ -126,7 +99,7 @@ public class Store
         this.orders = orders;
     }
 
-    // ------------------------------------------------------------------------------------------------------- shipments
+    // ----------------------------------------------------------------------------------- shipments
 
     /**
      * Returns the shipments dispatched from this store.
@@ -146,7 +119,7 @@ public class Store
         this.shipments = shipments;
     }
 
-    // ----------------------------------------------------------------------------------------------------- inventories
+    // --------------------------------------------------------------------------------- inventories
 
     /**
      * Returns the inventories held by this store.
@@ -166,7 +139,7 @@ public class Store
         this.inventories = inventories;
     }
 
-    // -----------------------------------------------------------------------------------------------------------------
+    // ---------------------------------------------------------------------------------------------
     @OneToMany(mappedBy = Order.ATTRIBUTE_NAME_STORE,
                fetch = FetchType.LAZY,
                cascade = {

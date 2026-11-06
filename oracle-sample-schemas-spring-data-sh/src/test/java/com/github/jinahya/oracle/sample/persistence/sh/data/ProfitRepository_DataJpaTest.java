@@ -1,7 +1,7 @@
 package com.github.jinahya.oracle.sample.persistence.sh.data;
 
 import com.github.jinahya.oracle.sample.persistence.sh.Profit;
-import com.github.jinahya.oracle.sample.persistence.sh.ProfitId;
+import com.github.jinahya.oracle.sample.persistence.sh.mapped.ProfitId;
 
 /**
  * Tests {@link ProfitRepository} in a JPA slice, over an embedded H2, through {@link _Repository_DataJpaTest}.

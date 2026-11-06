@@ -27,7 +27,6 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
-import jakarta.persistence.NamedQuery;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import jakarta.validation.Valid;
@@ -42,84 +41,39 @@ import java.util.Optional;
  *
  * @author Jin Kwon &lt;onacit_at_gmail.com&gt;
  */
-@NamedQuery(name = "Country.selectListByRegionOrderByCountryNameAsc",
-            query = """
-                    SELECT e
-                    FROM Country AS e
-                    WHERE e.region = :region
-                    ORDER BY e.countryName ASC"""
-)
-@NamedQuery(name = "Country.selectListByRegionOrderByCountryIdAsc",
-            query = """
-                    SELECT e
-                    FROM Country AS e
-                    WHERE e.region = :region
-                    ORDER BY e.countryId ASC"""
-)
-@NamedQuery(name = "Country.selectListOrderByCountryNameAsc",
-            query = """
-                    SELECT e
-                    FROM Country AS e
-                    ORDER BY e.countryName ASC"""
-)
-@NamedQuery(name = "Country.selectListOrderByCountryIdAsc",
-            query = """
-                    SELECT e
-                    FROM Country AS e
-                    ORDER BY e.countryId ASC"""
-)
-@NamedQuery(name = "Country.selectOneByCountryId",
-            query = """
-                    SELECT e
-                    FROM Country e
-                    WHERE e.countryId = :countryId"""
-)
-@NamedQuery(name = "Country.selectListOrderByCountryIdAscCountryIdGt",
-            query = """
-                    SELECT e
-                    FROM Country e
-                    WHERE e.countryId > :countryIdMinExclusive
-                    ORDER BY e.countryId ASC"""
-)
-@NamedQuery(name = "Country.countAll",
-            query = """
-                    SELECT COUNT(e)
-                    FROM Country e"""
-)
-@NamedQuery(name = "Country.countByRegion",
-            query = """
-                    SELECT COUNT(e)
-                    FROM Country e
-                    WHERE e.region = :region"""
-)
 @Entity
-@Table(name = MappedCountry.TABLE_NAME)
-public class Country extends MappedCountry {
+@Table(name = MappedCountry.TABLE_NAME, comment = "country table. References with locations table.")
+public class Country
+        extends MappedCountry {
 
-    // ------------------------------------------------------------------------------------------------------- REGION_ID
+    // ----------------------------------------------------------------------------------- REGION_ID
 
     /**
-     * The name of the attribute which maps the {@value #COLUMN_NAME_REGION_ID} column. The value is {@value}.
+     * The name of the attribute which maps the {@value #COLUMN_NAME_REGION_ID} column. The value is
+     * {@value}.
      */
     public static final String ATTRIBUTE_NAME_REGION = "region";
 
-    // ------------------------------------------------------------------------------------------------------- LOCATIONS
+    // ----------------------------------------------------------------------------------- LOCATIONS
 
     /**
-     * The name of the attribute which maps the {@link Location location}s of this country. The value is {@value}.
+     * The name of the attribute which maps the {@link Location location}s of this country. The
+     * value is {@value}.
      *
      * @see Location#ATTRIBUTE_NAME_COUNTRY
      */
     public static final String ATTRIBUTE_NAME_LOCATIONS = "locations";
 
-    // -----------------------------------------------------------------------------------------------------------------
-    static final Comparator<Country> comparingCountryId = Comparator.comparing(Country::getCountryId);
+    // ---------------------------------------------------------------------------------------------
+    static final Comparator<Country> comparingCountryId =
+            Comparator.comparing(Country::getCountryId);
 
-    static Comparator<Country> comparingCountryName(final Comparator<? super String> nameComparator) {
+    static Comparator<Country> comparingCountryName(
+            final Comparator<? super String> nameComparator) {
         return Comparator.comparing(Country::getCountryName, nameComparator);
     }
 
-    // ---------------------------------------------------------------------------------------------------- CONSTRUCTORS
+    // -------------------------------------------------------------------------------- CONSTRUCTORS
 
     /**
      * Creates a new instance.
@@ -128,20 +82,21 @@ public class Country extends MappedCountry {
         super();
     }
 
-    // ------------------------------------------------------------------------------------------------------- countryId
+    // ----------------------------------------------------------------------------------- countryId
 
     /**
      * {@inheritDoc}
      *
      * @param countryId {@inheritDoc}
-     * @implNote Re-declared so that the code in this package, which the identifier is assigned by, can call it.
+     * @implNote Re-declared so that the code in this package, which the identifier is
+     *         assigned by, can call it.
      */
     @Override
     protected void setCountryId(@Nonnull final String countryId) {
         super.setCountryId(countryId);
     }
 
-    // ---------------------------------------------------------------------------------------------------------- region
+    // -------------------------------------------------------------------------------------- region
 
     /**
      * Returns current value of {@value #ATTRIBUTE_NAME_REGION} attribute.
@@ -154,8 +109,8 @@ public class Country extends MappedCountry {
     }
 
     /**
-     * Replaces current value of {@value #ATTRIBUTE_NAME_REGION} attribute with the specified value, and the
-     * {@value #ATTRIBUTE_NAME_REGION_ID} attribute with its identifier.
+     * Replaces current value of {@value #ATTRIBUTE_NAME_REGION} attribute with the specified value,
+     * and the {@value #ATTRIBUTE_NAME_REGION_ID} attribute with its identifier.
      *
      * @param region new value for {@value #ATTRIBUTE_NAME_REGION} attribute.
      */
@@ -168,7 +123,7 @@ public class Country extends MappedCountry {
         );
     }
 
-    // ------------------------------------------------------------------------------------------------------- locations
+    // ----------------------------------------------------------------------------------- locations
     List<Location> getLocations() {
         return locations;
     }
@@ -177,7 +132,7 @@ public class Country extends MappedCountry {
         this.locations = locations;
     }
 
-    // -----------------------------------------------------------------------------------------------------------------
+    // ---------------------------------------------------------------------------------------------
     @Nullable
     @Valid
     @ManyToOne(optional = true, fetch = FetchType.LAZY, cascade = {})
@@ -187,7 +142,7 @@ public class Country extends MappedCountry {
     )
     private Region region;
 
-    // -----------------------------------------------------------------------------------------------------------------
+    // ---------------------------------------------------------------------------------------------
     @OneToMany(mappedBy = Location.ATTRIBUTE_NAME_COUNTRY,
                fetch = FetchType.LAZY,
                cascade = {

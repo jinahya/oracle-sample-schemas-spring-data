@@ -1,8 +1,8 @@
 package com.github.jinahya.oracle.sample.persistence.sh.data;
 
 import com.github.jinahya.oracle.sample.persistence.sh.Profit;
-import com.github.jinahya.oracle.sample.persistence.sh.ProfitId;
 import com.github.jinahya.oracle.sample.persistence.sh.Profit_;
+import com.github.jinahya.oracle.sample.persistence.sh.mapped.ProfitId;
 import org.springframework.stereotype.Repository;
 
 /**

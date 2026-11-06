@@ -1,7 +1,7 @@
 package com.github.jinahya.oracle.sample.persistence.co.data;
 
 import com.github.jinahya.oracle.sample.persistence.co.OrderItem;
-import com.github.jinahya.oracle.sample.persistence.co.OrderItemId;
+import com.github.jinahya.oracle.sample.persistence.co.mapped.OrderItemId;
 
 /**
  * Tests {@link OrderItemRepository} in a JPA slice, over an embedded H2, through {@link _Repository_DataJpaTest}.

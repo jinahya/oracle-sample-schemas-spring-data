@@ -27,7 +27,6 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
-import jakarta.persistence.NamedQuery;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import jakarta.validation.Valid;
@@ -42,123 +41,62 @@ import java.util.Optional;
  *
  * @author Jaehan Lim
  */
-@NamedQuery(name = "Employee.selectOneByEmployeeId",
-            query = """
-                    SELECT e
-                    FROM Employee e
-                    WHERE e.employeeId = :employeeId"""
-)
-@NamedQuery(name = "Employee.selectListOrderByEmployeeIdAsc",
-            query = """
-                    SELECT e
-                    FROM Employee e
-                    ORDER BY e.employeeId ASC"""
-)
-@NamedQuery(name = "Employee.selectListOrderByEmployeeIdAscEmployeeIdGt",
-            query = """
-                    SELECT e
-                    FROM Employee e
-                    WHERE e.employeeId > :employeeIdMinExclusive
-                    ORDER BY e.employeeId ASC"""
-)
-@NamedQuery(name = "Employee.countAll",
-            query = """
-                    SELECT COUNT(e)
-                    FROM Employee e"""
-)
-@NamedQuery(name = "Employee.selectListByJobOrderByEmployeeIdAsc",
-            query = """
-                    SELECT e
-                    FROM Employee e
-                    WHERE e.job = :job
-                    ORDER BY e.employeeId ASC"""
-)
-@NamedQuery(name = "Employee.countByJob",
-            query = """
-                    SELECT COUNT(e)
-                    FROM Employee e
-                    WHERE e.job = :job"""
-)
-@NamedQuery(name = "Employee.selectListByManagerOrderByEmployeeIdAsc",
-            query = """
-                    SELECT e
-                    FROM Employee e
-                    WHERE e.manager = :manager
-                    ORDER BY e.employeeId ASC"""
-)
-@NamedQuery(name = "Employee.countByManager",
-            query = """
-                    SELECT COUNT(e)
-                    FROM Employee e
-                    WHERE e.manager = :manager"""
-)
-@NamedQuery(name = "Employee.selectListByManagerOfManagerOrderByLastNameAsc",
-            query = """
-                    SELECT e
-                    FROM Employee e
-                    WHERE e.manager.manager = :manager
-                    ORDER BY e.lastName ASC, e.firstName ASC"""
-)
-@NamedQuery(name = "Employee.selectListByDepartmentOrderByEmployeeIdAsc",
-            query = """
-                    SELECT e
-                    FROM Employee e
-                    WHERE e.department = :department
-                    ORDER BY e.employeeId ASC"""
-)
-@NamedQuery(name = "Employee.countByDepartment",
-            query = """
-                    SELECT COUNT(e)
-                    FROM Employee e
-                    WHERE e.department = :department"""
-)
 @Entity
-@Table(name = MappedEmployee.TABLE_NAME)
-public class Employee extends MappedEmployee {
+@Table(name = MappedEmployee.TABLE_NAME,
+       comment = "employees table. References with departments,\n" +
+               "jobs, job_history tables. Contains a self reference.")
+public class Employee
+        extends MappedEmployee {
 
-    // ---------------------------------------------------------------------------------------------------------- JOB_ID
+    // -------------------------------------------------------------------------------------- JOB_ID
 
     /**
-     * The name of the attribute which maps the {@value #COLUMN_NAME_JOB_ID} column. The value is {@value}.
+     * The name of the attribute which maps the {@value #COLUMN_NAME_JOB_ID} column. The value is
+     * {@value}.
      */
     public static final String ATTRIBUTE_NAME_JOB = "job";
 
-    // ------------------------------------------------------------------------------------------------------ MANAGER_ID
+    // ---------------------------------------------------------------------------------- MANAGER_ID
 
     /**
-     * The name of the attribute which maps the {@value #COLUMN_NAME_MANAGER_ID} column. The value is {@value}.
+     * The name of the attribute which maps the {@value #COLUMN_NAME_MANAGER_ID} column. The value
+     * is {@value}.
      */
     public static final String ATTRIBUTE_NAME_MANAGER = "manager";
 
-    // --------------------------------------------------------------------------------------------------- DEPARTMENT_ID
+    // ------------------------------------------------------------------------------- DEPARTMENT_ID
 
     /**
-     * The name of the attribute which maps the {@value #COLUMN_NAME_DEPARTMENT_ID} column. The value is {@value}.
+     * The name of the attribute which maps the {@value #COLUMN_NAME_DEPARTMENT_ID} column. The
+     * value is {@value}.
      */
     public static final String ATTRIBUTE_NAME_DEPARTMENT = "department";
 
     /**
-     * The name of the attribute which maps the subordinates of this manager. The value is {@value}.
+     * The name of the attribute which maps the subordinates of this manager. The value is
+     * {@value}.
      *
      * @see #ATTRIBUTE_NAME_MANAGER
      */
     public static final String ATTRIBUTE_NAME_SUBORDINATES = "subordinates";
 
     /**
-     * The name of the attribute which maps the departments this employee manages. The value is {@value}.
+     * The name of the attribute which maps the departments this employee manages. The value is
+     * {@value}.
      *
      * @see Department#ATTRIBUTE_NAME_MANAGER
      */
     public static final String ATTRIBUTE_NAME_MANAGED_DEPARTMENTS = "managedDepartments";
 
     /**
-     * The name of the attribute which maps the past job assignments of this employee. The value is {@value}.
+     * The name of the attribute which maps the past job assignments of this employee. The value is
+     * {@value}.
      *
      * @see JobHistory#ATTRIBUTE_NAME_EMPLOYEE
      */
     public static final String ATTRIBUTE_NAME_JOB_HISTORIES = "jobHistories";
 
-    // ---------------------------------------------------------------------------------------------------- CONSTRUCTORS
+    // -------------------------------------------------------------------------------- CONSTRUCTORS
 
     /**
      * Creates a new instance.
@@ -167,19 +105,20 @@ public class Employee extends MappedEmployee {
         super();
     }
 
-    // ------------------------------------------------------------------------------------------------- Bean-Validation
+    // ----------------------------------------------------------------------------- Bean-Validation
 
     /**
-     * Tests whether current value of the {@value #ATTRIBUTE_NAME_SALARY} attribute is less than or equal to the result
-     * of the {@link #getJobMaxSalary()} method.
+     * Tests whether current value of the {@value #ATTRIBUTE_NAME_SALARY} attribute is less than or
+     * equal to the result of the {@link #getJobMaxSalary()} method.
      *
-     * @return {@code true} if the current value of the {@value #ATTRIBUTE_NAME_SALARY} attribute is less than or equal
-     * to the result of the {@link #getJobMaxSalary()} method, or either of them is {@code null}; {@code false}
-     * otherwise.
+     * @return {@code true} if the current value of the {@value #ATTRIBUTE_NAME_SALARY} attribute is
+     *         less than or equal to the result of the {@link #getJobMaxSalary()} method, or either
+     *         of them is {@code null}; {@code false} otherwise.
      * @see #getJobMaxSalary()
      */
     @SuppressWarnings({
-            "java:S3011" // Reflection should not be used to increase accessibility of classes, methods, or fields
+            "java:S3011" // Reflection should not be used to increase accessibility of classes,
+            // methods, or fields
     })
     protected boolean isSalaryLessThanOrEqualToJobMaxSalary() {
         if (getSalary() == null) {
@@ -195,12 +134,12 @@ public class Employee extends MappedEmployee {
     //    @jakarta.validation.constraints.AssertTrue
 
     /**
-     * Indicates whether the {@value #ATTRIBUTE_NAME_SALARY} attribute is greater than or equal to the
-     * {@value Job#ATTRIBUTE_NAME_MIN_SALARY} of the job.
+     * Indicates whether the {@value #ATTRIBUTE_NAME_SALARY} attribute is greater than or equal to
+     * the {@value Job#ATTRIBUTE_NAME_MIN_SALARY} of the job.
      *
-     * @return {@code true} if the {@value #ATTRIBUTE_NAME_SALARY} attribute is greater than or equal to the
-     * {@value Job#ATTRIBUTE_NAME_MIN_SALARY} of the job, or there is no salary, no job, or no minimum salary to
-     * compare; {@code false} otherwise.
+     * @return {@code true} if the {@value #ATTRIBUTE_NAME_SALARY} attribute is greater than or
+     *         equal to the {@value Job#ATTRIBUTE_NAME_MIN_SALARY} of the job, or there is no
+     *         salary, no job, or no minimum salary to compare; {@code false} otherwise.
      */
     protected boolean isSalaryGreaterThanOrEqualToJobMinSalary() {
         if (getSalary() == null || job == null || job.getMinSalary() == null) {
@@ -209,7 +148,7 @@ public class Employee extends MappedEmployee {
         return getSalary().compareTo(java.math.BigDecimal.valueOf(job.getMinSalary())) >= 0;
     }
 
-    // ------------------------------------------------------------------------------------------------------------- job
+    // ----------------------------------------------------------------------------------------- job
 
     /**
      * Returns current value of {@value #ATTRIBUTE_NAME_JOB} attribute.
@@ -222,11 +161,12 @@ public class Employee extends MappedEmployee {
     }
 
     /**
-     * Replaces current value of {@value #ATTRIBUTE_NAME_JOB} attribute with the specified value, and the
-     * {@value #ATTRIBUTE_NAME_JOB_ID} attribute with its identifier.
+     * Replaces current value of {@value #ATTRIBUTE_NAME_JOB} attribute with the specified value,
+     * and the {@value #ATTRIBUTE_NAME_JOB_ID} attribute with its identifier.
      * <p>
-     * Changing it on a persisted employee makes the database's {@code UPDATE_JOB_HISTORY} trigger insert a
-     * {@value JobHistory#TABLE_NAME} row, with the previous job and department, when the change is flushed.
+     * Changing it on a persisted employee makes the database's {@code UPDATE_JOB_HISTORY} trigger
+     * insert a {@value JobHistory#TABLE_NAME} row, with the previous job and department, when the
+     * change is flushed.
      *
      * @param job new value for {@value #ATTRIBUTE_NAME_JOB} attribute.
      */
@@ -240,7 +180,7 @@ public class Employee extends MappedEmployee {
         // TODO: adjust current salary to between job.minSalary and job.maxSalary
     }
 
-    // --------------------------------------------------------------------------------------------------------- manager
+    // ------------------------------------------------------------------------------------- manager
 
     /**
      * Returns current value of {@value #ATTRIBUTE_NAME_MANAGER} attribute.
@@ -253,8 +193,8 @@ public class Employee extends MappedEmployee {
     }
 
     /**
-     * Replaces current value of {@value #ATTRIBUTE_NAME_MANAGER} attribute with the specified value, and the
-     * {@value #ATTRIBUTE_NAME_MANAGER_ID} attribute with its identifier.
+     * Replaces current value of {@value #ATTRIBUTE_NAME_MANAGER} attribute with the specified
+     * value, and the {@value #ATTRIBUTE_NAME_MANAGER_ID} attribute with its identifier.
      *
      * @param manager new value for {@value #ATTRIBUTE_NAME_MANAGER} attribute.
      */
@@ -267,13 +207,14 @@ public class Employee extends MappedEmployee {
         );
     }
 
-    // ----------------------------------------------------------------------------------------------- this.jobMinSalary
+    // --------------------------------------------------------------------------- this.jobMinSalary
 
     /**
-     * Returns the {@value Job#ATTRIBUTE_NAME_MIN_SALARY} of the {@value #ATTRIBUTE_NAME_JOB} of this employee.
+     * Returns the {@value Job#ATTRIBUTE_NAME_MIN_SALARY} of the {@value #ATTRIBUTE_NAME_JOB} of
+     * this employee.
      *
-     * @return the {@value Job#ATTRIBUTE_NAME_MIN_SALARY} of the {@value #ATTRIBUTE_NAME_JOB} of this employee;
-     * {@code null} when no job is assigned, or the job has none.
+     * @return the {@value Job#ATTRIBUTE_NAME_MIN_SALARY} of the {@value #ATTRIBUTE_NAME_JOB} of
+     *         this employee; {@code null} when no job is assigned, or the job has none.
      */
     @Nullable
     protected BigDecimal getJobMinSalary() {
@@ -284,13 +225,14 @@ public class Employee extends MappedEmployee {
                 .orElse(null);
     }
 
-    // ----------------------------------------------------------------------------------------------- this.jobMaxSalary
+    // --------------------------------------------------------------------------- this.jobMaxSalary
 
     /**
-     * Returns the {@value Job#ATTRIBUTE_NAME_MAX_SALARY} of the {@value #ATTRIBUTE_NAME_JOB} of this employee.
+     * Returns the {@value Job#ATTRIBUTE_NAME_MAX_SALARY} of the {@value #ATTRIBUTE_NAME_JOB} of
+     * this employee.
      *
-     * @return the {@value Job#ATTRIBUTE_NAME_MAX_SALARY} of the {@value #ATTRIBUTE_NAME_JOB} of this employee;
-     * {@code null} when no job is assigned, or the job has none.
+     * @return the {@value Job#ATTRIBUTE_NAME_MAX_SALARY} of the {@value #ATTRIBUTE_NAME_JOB} of
+     *         this employee; {@code null} when no job is assigned, or the job has none.
      */
     @Nullable
     protected BigDecimal getJobMaxSalary() {
@@ -301,7 +243,7 @@ public class Employee extends MappedEmployee {
                 .orElse(null);
     }
 
-    // ------------------------------------------------------------------------------------------------------ department
+    // ---------------------------------------------------------------------------------- department
 
     /**
      * Returns current value of {@value #ATTRIBUTE_NAME_DEPARTMENT} attribute.
@@ -313,11 +255,12 @@ public class Employee extends MappedEmployee {
     }
 
     /**
-     * Replaces current value of {@value #ATTRIBUTE_NAME_DEPARTMENT} attribute with the specified value, and the
-     * {@value #ATTRIBUTE_NAME_DEPARTMENT_ID} attribute with its identifier.
+     * Replaces current value of {@value #ATTRIBUTE_NAME_DEPARTMENT} attribute with the specified
+     * value, and the {@value #ATTRIBUTE_NAME_DEPARTMENT_ID} attribute with its identifier.
      * <p>
-     * Changing it on a persisted employee makes the database's {@code UPDATE_JOB_HISTORY} trigger insert a
-     * {@value JobHistory#TABLE_NAME} row, with the previous job and department, when the change is flushed.
+     * Changing it on a persisted employee makes the database's {@code UPDATE_JOB_HISTORY} trigger
+     * insert a {@value JobHistory#TABLE_NAME} row, with the previous job and department, when the
+     * change is flushed.
      *
      * @param department new value for {@value #ATTRIBUTE_NAME_DEPARTMENT} attribute.
      */
@@ -330,7 +273,7 @@ public class Employee extends MappedEmployee {
         );
     }
 
-    // ---------------------------------------------------------------------------------------------------- subordinates
+    // -------------------------------------------------------------------------------- subordinates
 
     /**
      * Returns <em>subordinates</em> of this <em>manager</em>.
@@ -350,7 +293,7 @@ public class Employee extends MappedEmployee {
         this.subordinates = subordinates;
     }
 
-    // ---------------------------------------------------------------------------------------------- managedDepartments
+    // -------------------------------------------------------------------------- managedDepartments
 
     /**
      * Returns the departments this employee manages.
@@ -370,7 +313,7 @@ public class Employee extends MappedEmployee {
         this.managedDepartments = managedDepartments;
     }
 
-    // ---------------------------------------------------------------------------------------------------- jobHistories
+    // -------------------------------------------------------------------------------- jobHistories
 
     /**
      * Returns the past job assignments of this employee.
@@ -390,7 +333,7 @@ public class Employee extends MappedEmployee {
         this.jobHistories = jobHistories;
     }
 
-    // -----------------------------------------------------------------------------------------------------------------
+    // ---------------------------------------------------------------------------------------------
     @Nonnull
     @Valid
     @NotNull
@@ -407,7 +350,7 @@ public class Employee extends MappedEmployee {
     )
     private Job job;
 
-    // -----------------------------------------------------------------------------------------------------------------
+    // ---------------------------------------------------------------------------------------------
     @Nullable
     @Valid
     @ManyToOne(optional = true,
@@ -423,7 +366,7 @@ public class Employee extends MappedEmployee {
     )
     private Employee manager;
 
-    // -----------------------------------------------------------------------------------------------------------------
+    // ---------------------------------------------------------------------------------------------
     @Nullable
     @Valid
     @ManyToOne(optional = true,
@@ -439,7 +382,7 @@ public class Employee extends MappedEmployee {
     )
     private Department department;
 
-    // -----------------------------------------------------------------------------------------------------------------
+    // ---------------------------------------------------------------------------------------------
     @OneToMany(mappedBy = Employee.ATTRIBUTE_NAME_MANAGER,
                fetch = FetchType.LAZY,
                cascade = {
@@ -448,7 +391,7 @@ public class Employee extends MappedEmployee {
     )
     private List<@Valid @NotNull Employee> subordinates;
 
-    // -----------------------------------------------------------------------------------------------------------------
+    // ---------------------------------------------------------------------------------------------
     @OneToMany(mappedBy = Department.ATTRIBUTE_NAME_MANAGER,
                fetch = FetchType.LAZY,
                cascade = {
@@ -457,7 +400,7 @@ public class Employee extends MappedEmployee {
     )
     private List<@Valid @NotNull Department> managedDepartments;
 
-    // -----------------------------------------------------------------------------------------------------------------
+    // ---------------------------------------------------------------------------------------------
     @OneToMany(mappedBy = JobHistory.ATTRIBUTE_NAME_EMPLOYEE,
                fetch = FetchType.LAZY,
                cascade = {

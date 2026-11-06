@@ -23,7 +23,8 @@ package com.github.jinahya.oracle.sample.persistence.co;
 import com.github.jinahya.oracle.sample.persistence.co.mapped.MappedProduct;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
-import jakarta.persistence.NamedQuery;
+import jakarta.persistence.NamedAttributeNode;
+import jakarta.persistence.NamedEntityGraph;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import jakarta.validation.Valid;
@@ -36,72 +37,54 @@ import java.util.List;
  *
  * @author Jin Kwon &lt;onacit_at_gmail.com&gt;
  */
-@NamedQuery(
-        name = "Product.selectListByUnitPriceGreaterThanEqualAndUnitPriceLessThanOrderByUnitPricesAsc",
-        query = """
-                SELECT e
-                FROM Product e
-                WHERE e.unitPrice >= :unitPriceMinInclusive AND e.unitPrice < :unitPriceMaxExclusive
-                ORDER BY e.unitPrice ASC"""
+@NamedEntityGraph(
+        name = Product.ENTITY_GRAPH_NAME_PRODUCT_DETAILS,
+        attributeNodes = @NamedAttributeNode(MappedProduct.ATTRIBUTE_NAME_PRODUCT_DETAILS)
 )
-@NamedQuery(
-        name = "Product.selectListByUnitPriceBetweenOrderByUnitPricesAsc",
-        query = """
-                SELECT e
-                FROM Product e
-                WHERE e.unitPrice BETWEEN :unitPriceAfter AND :unitPriceBefore
-                ORDER BY e.unitPrice ASC"""
-)
-@NamedQuery(
-        name = "Product.selectListOrderByProductIdAscProductIdGt",
-        query = """
-                SELECT e
-                FROM Product e
-                WHERE e.productId > :productIdMinExclusive
-                ORDER BY e.productId ASC"""
-)
-@NamedQuery(
-        name = "Product.selectListOrderByProductIdAsc",
-        query = """
-                SELECT e
-                FROM Product e
-                ORDER BY e.productId ASC"""
-)
-@NamedQuery(name = "Product.selectOneByProductId",
-            query = """
-                    SELECT e
-                    FROM Product e
-                    WHERE e.productId = :productId"""
-)
-@NamedQuery(name = "Product.countAll",
-            query = """
-                    SELECT COUNT(e)
-                    FROM Product e"""
+@NamedEntityGraph(
+        name = Product.ENTITY_GRAPH_NAME_PRODUCT_IMAGE,
+        attributeNodes = @NamedAttributeNode(MappedProduct.ATTRIBUTE_NAME_PRODUCT_IMAGE)
 )
 @Entity
-@Table(name = MappedProduct.TABLE_NAME)
+@Table(name = MappedProduct.TABLE_NAME, comment = "Details of goods that customers can purchase")
 public class Product
         extends MappedProduct {
 
-    // ----------------------------------------------------------------------------------------------------- ORDER_ITEMS
+    // -------------------------------------------------------------------------------- ENTITY_GRAPHS
 
     /**
-     * The name of the attribute which maps the order items which order this product. The value is {@value}.
+     * The name of the entity graph which fetches the lazy
+     * {@value MappedProduct#ATTRIBUTE_NAME_PRODUCT_DETAILS} attribute. The value is {@value}.
+     */
+    public static final String ENTITY_GRAPH_NAME_PRODUCT_DETAILS = "Product.productDetails";
+
+    /**
+     * The name of the entity graph which fetches the lazy
+     * {@value MappedProduct#ATTRIBUTE_NAME_PRODUCT_IMAGE} attribute. The value is {@value}.
+     */
+    public static final String ENTITY_GRAPH_NAME_PRODUCT_IMAGE = "Product.productImage";
+
+    // --------------------------------------------------------------------------------- ORDER_ITEMS
+
+    /**
+     * The name of the attribute which maps the order items which order this product. The value is
+     * {@value}.
      *
      * @see OrderItem#ATTRIBUTE_NAME_PRODUCT
      */
     public static final String ATTRIBUTE_NAME_ORDER_ITEMS = "orderItems";
 
-    // ----------------------------------------------------------------------------------------------------- INVENTORIES
+    // --------------------------------------------------------------------------------- INVENTORIES
 
     /**
-     * The name of the attribute which maps the inventories which hold this product. The value is {@value}.
+     * The name of the attribute which maps the inventories which hold this product. The value is
+     * {@value}.
      *
      * @see Inventory#ATTRIBUTE_NAME_PRODUCT
      */
     public static final String ATTRIBUTE_NAME_INVENTORIES = "inventories";
 
-    // ---------------------------------------------------------------------------------------------------- CONSTRUCTORS
+    // -------------------------------------------------------------------------------- CONSTRUCTORS
 
     /**
      * Creates a new instance.
@@ -110,7 +93,7 @@ public class Product
         super();
     }
 
-    // ------------------------------------------------------------------------------------------------------ orderItems
+    // ---------------------------------------------------------------------------------- orderItems
 
     /**
      * Returns the order items which order this product.
@@ -130,7 +113,7 @@ public class Product
         this.orderItems = orderItems;
     }
 
-    // ----------------------------------------------------------------------------------------------------- inventories
+    // --------------------------------------------------------------------------------- inventories
 
     /**
      * Returns the inventories which hold this product.
@@ -150,7 +133,7 @@ public class Product
         this.inventories = inventories;
     }
 
-    // -----------------------------------------------------------------------------------------------------------------
+    // ---------------------------------------------------------------------------------------------
     @OneToMany(mappedBy = OrderItem.ATTRIBUTE_NAME_PRODUCT,
                fetch = FetchType.LAZY,
                cascade = {

@@ -1,8 +1,8 @@
 package com.github.jinahya.oracle.sample.persistence.sh.data;
 
 import com.github.jinahya.oracle.sample.persistence.sh.Cost;
-import com.github.jinahya.oracle.sample.persistence.sh.CostId;
 import com.github.jinahya.oracle.sample.persistence.sh.Cost_;
+import com.github.jinahya.oracle.sample.persistence.sh.mapped.CostId;
 import org.springframework.stereotype.Repository;
 
 /**

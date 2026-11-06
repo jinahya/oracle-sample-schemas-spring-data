@@ -20,50 +20,28 @@ package com.github.jinahya.oracle.sample.persistence.sh;
  * #L%
  */
 
+import com.github.jinahya.oracle.sample.persistence.sh.mapped.FweekPscatSalesMvId;
 import com.github.jinahya.oracle.sample.persistence.sh.mapped.MappedFweekPscatSalesMv;
 
 import jakarta.persistence.EmbeddedId;
 import jakarta.persistence.Entity;
-import jakarta.persistence.NamedQuery;
 import jakarta.persistence.Table;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 
 /**
- * An entity class for mapping the {@value FweekPscatSalesMv#TABLE_NAME} materialized view, whose composite identifier
- * is mapped with an {@link jakarta.persistence.EmbeddedId @EmbeddedId}.
+ * An entity class for mapping the {@value FweekPscatSalesMv#TABLE_NAME} materialized view, whose
+ * composite identifier is mapped with an {@link jakarta.persistence.EmbeddedId @EmbeddedId}.
  *
  * @author Jin Kwon &lt;onacit_at_gmail.com&gt;
  * @see FweekPscatSalesMvId
  */
-@NamedQuery(name = "FweekPscatSalesMv.selectOneByWeekEndingDayAndProdSubcategoryAndChannelIdAndPromoId",
-            query = """
-                    SELECT e
-                    FROM FweekPscatSalesMv e
-                    WHERE e.id.weekEndingDay = :weekEndingDay
-                      AND e.id.prodSubcategory = :prodSubcategory
-                      AND e.id.channelId = :channelId
-                      AND e.id.promoId = :promoId"""
-)
-@NamedQuery(name = "FweekPscatSalesMv.selectListOrderByWeekEndingDayAscProdSubcategoryAscChannelIdAscPromoIdAsc",
-            query = """
-                    SELECT e
-                    FROM FweekPscatSalesMv e
-                    ORDER BY e.id.weekEndingDay ASC,
-                             e.id.prodSubcategory ASC,
-                             e.id.channelId ASC,
-                             e.id.promoId ASC"""
-)
-@NamedQuery(name = "FweekPscatSalesMv.countAll",
-            query = """
-                    SELECT COUNT(e)
-                    FROM FweekPscatSalesMv e"""
-)
 @Entity
 @Table(name = MappedFweekPscatSalesMv.TABLE_NAME)
-public class FweekPscatSalesMv extends MappedFweekPscatSalesMv {
+public class FweekPscatSalesMv
+        extends MappedFweekPscatSalesMv {
 
-    // ---------------------------------------------------------------------------------------------------- CONSTRUCTORS
+    // -------------------------------------------------------------------------------- CONSTRUCTORS
 
     /**
      * Creates a new instance.
@@ -72,22 +50,22 @@ public class FweekPscatSalesMv extends MappedFweekPscatSalesMv {
         super();
     }
 
-    // -------------------------------------------------------------------------------------------------------------- id
+    // ----------------------------------------------------------------------------------------- id_
 
     /**
-     * Returns current value of {@value #ATTRIBUTE_NAME_ID} attribute.
+     * Returns current value of {@value #ATTRIBUTE_NAME_ID_} attribute.
      *
-     * @return current value of {@value #ATTRIBUTE_NAME_ID} attribute.
+     * @return current value of {@value #ATTRIBUTE_NAME_ID_} attribute.
      */
     @Override
-    public FweekPscatSalesMvId getId() {
-        return id;
+    public FweekPscatSalesMvId getId_() {
+        return id_;
     }
 
-    // -----------------------------------------------------------------------------------------------------------------
+    // ---------------------------------------------------------------------------------------------
 
     @Valid
     @NotNull
     @EmbeddedId
-    private FweekPscatSalesMvId id;
+    private FweekPscatSalesMvId id_;
 }

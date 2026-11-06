@@ -1,8 +1,8 @@
 package com.github.jinahya.oracle.sample.persistence.co.data;
 
 import com.github.jinahya.oracle.sample.persistence.co.ProductOrder;
-import com.github.jinahya.oracle.sample.persistence.co.ProductOrderId;
 import com.github.jinahya.oracle.sample.persistence.co.ProductOrder_;
+import com.github.jinahya.oracle.sample.persistence.co.mapped.ProductOrderId;
 import org.springframework.stereotype.Repository;
 
 /**

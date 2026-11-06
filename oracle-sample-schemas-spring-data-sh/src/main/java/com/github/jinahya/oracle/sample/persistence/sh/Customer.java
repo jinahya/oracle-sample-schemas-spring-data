@@ -26,7 +26,6 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
-import jakarta.persistence.NamedQuery;
 import jakarta.persistence.Table;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
@@ -38,57 +37,10 @@ import java.util.Optional;
  *
  * @author Jin Kwon &lt;onacit_at_gmail.com&gt;
  */
-@NamedQuery(name = "Customer.selectOneByCustId",
-            query = """
-                    SELECT e
-                    FROM Customer e
-                    WHERE e.custId = :custId"""
-)
-@NamedQuery(name = "Customer.selectListOrderByCustIdAsc",
-            query = """
-                    SELECT e
-                    FROM Customer e
-                    ORDER BY e.custId ASC"""
-)
-@NamedQuery(name = "Customer.selectListOrderByCustIdAscCustIdGt",
-            query = """
-                    SELECT e
-                    FROM Customer e
-                    WHERE e.custId > :custIdMinExclusive
-                    ORDER BY e.custId ASC"""
-)
-@NamedQuery(name = "Customer.countAll",
-            query = """
-                    SELECT COUNT(e)
-                    FROM Customer e"""
-)
-@NamedQuery(name = "Customer.selectListPromotedByCustCityOrderByCustLastNameAsc",
-            query = """
-                    SELECT c
-                    FROM Customer c
-                    WHERE c.custCity = :custCity
-                      AND EXISTS (SELECT s
-                                  FROM Sales s
-                                  WHERE s.customer = c
-                                    AND s.promotion.promoCategory <> 'NO PROMOTION')
-                    ORDER BY c.custLastName ASC, c.custFirstName ASC, c.custId ASC"""
-)
-@NamedQuery(name = "Customer.selectListByCountryOrderByCustIdAsc",
-            query = """
-                    SELECT e
-                    FROM Customer e
-                    WHERE e.country = :country
-                    ORDER BY e.custId ASC"""
-)
-@NamedQuery(name = "Customer.countByCountry",
-            query = """
-                    SELECT COUNT(e)
-                    FROM Customer e
-                    WHERE e.country = :country"""
-)
 @Entity
-@Table(name = MappedCustomer.TABLE_NAME)
-public class Customer extends MappedCustomer {
+@Table(name = MappedCustomer.TABLE_NAME, comment = "dimension table")
+public class Customer
+        extends MappedCustomer {
 
     /**
      * The name of the attribute which maps the {@value #COLUMN_NAME_COUNTRY_ID} column as a
@@ -96,7 +48,7 @@ public class Customer extends MappedCustomer {
      */
     public static final String ATTRIBUTE_NAME_COUNTRY = "country";
 
-    // ---------------------------------------------------------------------------------------------------- CONSTRUCTORS
+    // -------------------------------------------------------------------------------- CONSTRUCTORS
 
     /**
      * Creates a new instance.
@@ -105,7 +57,7 @@ public class Customer extends MappedCustomer {
         super();
     }
 
-    // -------------------------------------------------------------------------------------------------------- country
+    // ------------------------------------------------------------------------------------- country
 
     /**
      * Returns current value of {@value #ATTRIBUTE_NAME_COUNTRY} attribute.
@@ -117,8 +69,8 @@ public class Customer extends MappedCustomer {
     }
 
     /**
-     * Replaces current value of {@value #ATTRIBUTE_NAME_COUNTRY} attribute with the specified value, and the
-     * {@value #ATTRIBUTE_NAME_COUNTRY_ID} attribute with the country's identifier.
+     * Replaces current value of {@value #ATTRIBUTE_NAME_COUNTRY} attribute with the specified
+     * value, and the {@value #ATTRIBUTE_NAME_COUNTRY_ID} attribute with the country's identifier.
      *
      * @param country new value for {@value #ATTRIBUTE_NAME_COUNTRY} attribute.
      */
@@ -131,7 +83,7 @@ public class Customer extends MappedCustomer {
         );
     }
 
-    // -----------------------------------------------------------------------------------------------------------------
+    // ---------------------------------------------------------------------------------------------
 
     @Valid
     @NotNull

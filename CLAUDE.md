@@ -47,11 +47,13 @@ that exist only locally**: after a change upstream, run `./mvnw -DskipTests inst
 
 - **Upstream keeps its entities in `src/test`**, on purpose: which associations an entity maps, lazy or not, with what
   cascade, is an application's decision, and this project is that application. The entities here are copies of
-  upstream's test entities and id classes, verbatim
+  upstream's test entities
   (`oracle-sample-schemas-persistence-<schema>/src/test/java/com/github/jinahya/oracle/sample/persistence/<schema>/<Entity>.java`
   there), in the same package, so that the `test-companion` randomizers and persisters, compiled against that
   package, find them. **Keep them in step with upstream**: diff against upstream's before touching a mapping, and
-  change the mapping there first.
+  change the mapping there first. Each copy is upstream's, verbatim, plus only the named queries a repository runs (below). The id classes
+  are not copied: upstream keeps them in main, `<schema>.mapped` (`co.mapped.OrderItemId`, ...), and its jar brings
+  them.
 - **Do not copy upstream's randomizers or persisters into `src/test`.** The `test-companion` jar is on the test
   classpath, and `ObjectRandomizerUtils` / `EntityPersisterUtils` find `<Entity>_Randomizer` / `<Entity>_Persister`
   next to the entity by name. A copy only shadows the jar and drifts.
@@ -59,7 +61,7 @@ that exist only locally**: after a change upstream, run `./mvnw -DskipTests inst
   (`…persistence.co`). `Product_Randomizer` calls it, but the jar's includes take `*_Randomizer` and `*_Persister`
   only, so without the copy every `Product` randomization fails with `NoClassDefFoundError`. Drop the copy once
   upstream packages the helper. The same randomizer writes `PRODUCT_DETAILS` with Jackson 2's `ObjectMapper`, which
-  upstream has at test scope, so `co` declares `jackson-databind` (test, from the root's `jackson-bom` import).
+  upstream has at test scope, so `co` declares `jackson-databind` (test, at the Jackson 2 version Boot manages).
 - **Not copied: the non-entity view classes.** Upstream maps `co`'s keyless views `PRODUCT_REVIEWS` and `STORE_ORDERS`
   as plain classes (`ProductReview`, `StoreOrder`), not entities. Spring Data JPA builds repositories for managed types
   only, and the classes are neither entities nor id classes, so there is no repository for either view.
@@ -68,9 +70,14 @@ that exist only locally**: after a change upstream, run `./mvnw -DskipTests inst
   constant is needed, use the mapped superclass's own `ATTRIBUTE_NAME_*` constant, or the metamodel's `EMAIL_ADDRESS`.
 - **Named queries** are declared on the entities as `<EntityName>.<queryName>` (`Customer.selectOneByEmailAddress`).
   A repository method of exactly that name runs the query with no annotation; its named parameters are bound by name
-  (`maven.compiler.parameters`), and the existing `@Param`s are kept.
+  (`maven.compiler.parameters`), and the existing `@Param`s are kept. They are this project's, not upstream's
+  (upstream dropped every named query, its commit 85076e2b), and an entity declares only the ones a repository method
+  here runs: today `Customer.selectOneByEmailAddress`, alone. When syncing an entity, take upstream's file and put
+  them back before `@Entity`, with `import jakarta.persistence.NamedQuery`. An `@EmbeddedId` is the attribute `id_`,
+  as upstream names it, so a query on one reads `e.id_.orderId`.
 - **Each composite key is mapped once**: `co`'s `OrderItem` and `ProductOrder`, and `sh`'s `Sales` and
   `FweekPscatSalesMv` with an `@EmbeddedId`; `hr`'s `JobHistory` and `sh`'s `Cost` and `Profit` with an `@IdClass`.
+  The id classes are upstream's, in `<schema>.mapped`, and the repositories and their tests import them from there.
   Hibernate logs `HHH90005707` ("Unable to locate static metamodel field") for the `@IdClass` attributes, which the
   mapped superclass declares and the entity's metamodel does not repeat; it is a warning, and the mappings work.
 - Identifiers of `co`'s tables are `IDENTITY` columns, which the randomizers leave `null`.
@@ -106,9 +113,10 @@ Each is commented in `pom.xml`:
 - **Spring Boot 4.x (`4.1.2`), not 3.x.** Boot 4 manages `jakarta.persistence-api` 3.2, which the upstream mappings are
   written against. Do not downgrade to dodge a problem.
 - **`spring-boot-dependencies` is imported, not inherited** (the root is parent-less). Every Spring / Boot / Hibernate
-  version comes from the BOM; declare those with no `<version>`. Direct `dependencyManagement` entries beat the BOM,
-  which is how the pins work: Lombok `1.18.48` (the BOM's breaks on newer JDKs), and `ojdbc17` and `h2` at upstream's
-  versions. The JUnit, Mockito and Jackson 2 BOMs are imported before Boot's, so they win.
+  version comes from the BOM; declare those with no `<version>`. A direct `dependencyManagement` entry is only for what
+  Boot does not manage. Lombok, the JDBC driver, H2, JUnit, Mockito, AssertJ and Logback, and Jackson 2, are at Boot's
+  versions: nothing is imported before Boot's BOM, and no entry pins over it, since a -data project is aligned by its
+  platform and the platform is what moves (PROJECTS_VERSIONS.asciidoc of jakarta-persistence-applied-book).
 - **`hibernate-processor` is on the processor path** of both compile executions, from the BOM's version, to generate
   the entities' static metamodel.
 - **Boot 4 starters come in pairs.** Tests declare `spring-boot-starter-data-jpa-test` and `-validation-test`, not
