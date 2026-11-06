@@ -36,7 +36,7 @@
     </dependency>
     <!--
       What Product_Randomizer of that jar writes the PRODUCT_DETAILS JSON with; upstream has it at test scope, so the
-      jar does not bring it. Jackson 2, from the jackson-bom of the root pom.
+      jar does not bring it. Jackson 2 (com.fasterxml), not Boot 4's Jackson 3, at the version Boot manages.
       -->
     <dependency>
       <groupId>com.fasterxml.jackson.core</groupId>
